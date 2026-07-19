@@ -1,0 +1,176 @@
+import { getFrameStrokes, addFrameStroke, removeLastStroke } from "./drawing";
+import { getCurrentFrame } from "./video";
+/** @import {Stroke} from "./types" */
+
+/** @type {HTMLCanvasElement} */
+let canvas;
+/** @type {CanvasRenderingContext2D} */
+let ctx;
+let canDraw = false;
+let drawing = false;
+/** @type {Stroke | null} */
+let currentStroke = null;
+let color = "#000000";
+const LINE_WIDTH = 3;
+const LINE_CAP = "round";
+
+/**
+ * Sets up the website canvas properly and adds event listeners
+ */
+export function initCanvas() {
+    // @ts-ignore
+    canvas = document.getElementById("canvas");
+    // @ts-ignore
+    ctx = canvas.getContext("2d");
+
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.lineCap = LINE_CAP;
+    ctx.strokeStyle = color;
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseout", endDraw);
+    canvas.addEventListener("mousemove", draw);
+    document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key === "z") {
+            e.preventDefault();
+            undoStroke();
+        }
+    });
+    // technically can work on phone?
+    // canvas.addEventListener("touchstart", startDraw);
+    // canvas.addEventListener("touchend", endDraw);
+    // canvas.addEventListener("touchmove", draw);
+}
+
+/**
+ * Removes the last stroke from the canvas
+ */
+function undoStroke() {
+
+    const currentFrame = getCurrentFrame();
+    removeLastStroke(currentFrame);
+    redrawFrameCanvas(currentFrame);
+}
+
+/**
+ * Draws all the drawings a user did on a specific frame
+ * @param {number} frame 
+ */
+export function redrawFrameCanvas(frame) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const strokes = getFrameStrokes(frame);
+    for (const stroke of strokes) {
+        drawStroke(stroke);
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+}
+
+/**
+ * Draws a singular stroke on the current canvas
+ * @param {Stroke} stroke 
+ */
+function drawStroke(stroke){
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.lineCap = LINE_CAP;
+
+    ctx.beginPath();
+
+    for (let i = 0; i < stroke.points.length; i++) {
+        const p = stroke.points[i];
+
+        if (i === 0) {
+            ctx.moveTo(p[0], p[1]);
+        } else {
+            ctx.lineTo(p[0], p[1]);
+        }
+    }
+    ctx.stroke();
+}
+
+/**
+ * 
+ * @param {MouseEvent} e 
+ * @returns {[number, number]} x,y position relative to canvas
+ */
+function getCanvasPosition(e) {
+    const rect = canvas.getBoundingClientRect();
+    return [e.clientX - rect.left, e.clientY - rect.top]
+}
+
+/**
+ * Sets up the drawing process
+ * @param {MouseEvent} e 
+ */
+function startDraw(e) {
+    drawing = true;
+    currentStroke = {
+        color: color,
+        points: [],
+    };
+    ctx.beginPath();
+    const [x,y] = getCanvasPosition(e);
+    ctx.moveTo(x, y);
+    draw(e);
+}
+
+/**
+ * Responsible for the drawing process. Draws on the canvas
+ * @param {MouseEvent} e 
+ */
+function draw(e) {
+    if (!canDraw || !drawing) return;
+
+    const [x,y] = getCanvasPosition(e)
+
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.lineCap = LINE_CAP;
+    if (!currentStroke) {
+        return;
+    }
+    currentStroke.points.push([x, y]);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+}
+
+/**
+ * Ends the drawing process
+ */
+function endDraw() {
+    drawing = false;
+    if (currentStroke) {
+        const currentFrame = getCurrentFrame();
+        addFrameStroke(currentFrame, currentStroke);
+    }
+    currentStroke = null;
+    ctx.beginPath();
+}
+
+/**
+ * Removes everything that is on the canvas. Records the clear operation so that undo can be used
+ */
+export function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (currentStroke) {
+        const currentFrame = getCurrentFrame();
+        addFrameStroke(currentFrame, { color: currentStroke.color, points: []});
+    }
+}
+
+/**
+ * 
+ * @param {boolean} value 
+ */
+export function setCanDraw(value) { canDraw = value; }
+
+/**
+ * 
+ * @param {string} newColor 
+ */
+export function setColor(newColor) {
+    color = newColor;
+    ctx.strokeStyle = color;
+}
