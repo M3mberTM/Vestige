@@ -179,17 +179,68 @@ function setVideoSize() {
 
 }
 
+function getFrameStrokes() {
+    // currentFrame = seekerSlider.value;
+    // strokes = frameStrokes.get(currentFrame) ?? [];
+    redrawCanvas();
+}
+
 // CANVAS FUNCTIONS
 let canDraw = false;
 let drawing = false;
+const frameStrokes = new Map();
+let strokes = [];
+let currentStroke = null;
+
+
+
+function redrawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const frame = Number(seekerSlider.value);
+    const strokes = frameStrokes.get(frame) ?? [];
+    for (const stroke of strokes) {
+        ctx.strokeStyle = stroke.color;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+
+        for (let i = 0; i < stroke.points.length; i++) {
+            const p = stroke.points[i];
+
+            if (i === 0) {
+                ctx.moveTo(p[0], p[1]);
+            } else {
+                ctx.lineTo(p[0], p[1]);
+            }
+        }
+
+        ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = colorInput.value;
+}
 
 function startDraw(e) {
 	drawing = true;
+    currentStroke = {
+        color: colorInput.value,
+        points: []
+    }
 	draw(e);
 }
 
 function endDraw() {
 	drawing = false;
+    if (currentStroke) {
+        const frame = Number(seekerSlider.value);
+        if (!frameStrokes.has(frame)) {
+            frameStrokes.set(frame, []);
+        }
+        frameStrokes.get(frame).push(currentStroke);
+    }
+    currentStroke = null;
 	ctx.beginPath();
 }
 
@@ -203,6 +254,7 @@ function draw(e) {
 
 	ctx.lineWidth = 3;
 	ctx.lineCap = "round";
+    currentStroke.points.push([x, y]);
 	ctx.lineTo(x, y);
 	ctx.stroke();
 	ctx.beginPath();
@@ -211,6 +263,10 @@ function draw(e) {
 
 function clearCanvas() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (currentStroke) {
+        const frame = Number(seekerSlider.value);
+        frameStrokes.get(frame).push({color: currentStroke.color, points: []});
+    }
 }
 
 // CANVAS HANDLERS
@@ -223,6 +279,15 @@ canvas.addEventListener("touchstart", startDraw);
 canvas.addEventListener("touchend", endDraw);
 canvas.addEventListener("touchmove", draw);
 
+document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "z") {
+        e.preventDefault();
+        const frame = Number(seekerSlider.value);
+        frameStrokes.get(frame).pop();
+        redrawCanvas();
+    }
+});
+
 
 // EVENT HANDLERS
 colorInput.onchange = () => {
@@ -233,12 +298,14 @@ colorInput.onchange = () => {
 prevFrameBtn.onclick = () => {
     if (video.currentTime > 0) {
         video.currentTime -= 1 / videoFps;
+        getFrameStrokes();
     }
 };
 
 nextFrameBtn.onclick = () => {
     if (video.currentTime < video.duration) {
         video.currentTime += 1 / videoFps;
+        getFrameStrokes();
     }
 };
 
@@ -255,10 +322,12 @@ playPauseBtn.onclick = () => {
 
 video.addEventListener("timeupdate", () => {
     seekerSlider.value = Math.round(video.currentTime * videoFps)
+    getFrameStrokes();
 });
 
 seekerSlider.addEventListener("input", () => {
     video.currentTime = seekerSlider.value / videoFps;
+    getFrameStrokes();
 });
 
 video.addEventListener("ended", () => {
@@ -275,7 +344,6 @@ fileInput.addEventListener("change", () => {
 		const file = fileInput.files[0];
 		if (!file) return;
 
-		// Release previous object URL if there was one
 		if (video.src) {
 				URL.revokeObjectURL(video.src);
 		}
@@ -284,7 +352,7 @@ fileInput.addEventListener("change", () => {
 		video.src = url;
 		video.load();
 
-        // reading video metadata with mp4box
+        // all this just to get the framerate of the video
         const mp4boxFile = MP4Box.createFile();
 
         mp4boxFile.onReady = (info) => {
@@ -293,7 +361,6 @@ fileInput.addEventListener("change", () => {
             const fps = track.nb_samples * track.timescale / track.duration;
             videoFps = fps;
             seekerSlider.max = track.nb_samples - 1;
-            console.log(info);
         };
 
         const reader = new FileReader();
@@ -301,7 +368,7 @@ fileInput.addEventListener("change", () => {
         reader.onload = (e) => {
             const buffer = e.target.result;
 
-            // MP4Box requires this property
+            // MP4Box requires this property for some reason
             buffer.fileStart = 0;
 
             mp4boxFile.appendBuffer(buffer);
@@ -312,8 +379,6 @@ fileInput.addEventListener("change", () => {
 });
 
 video.addEventListener("loadedmetadata", () => {
-    // video.style.width = "auto";
-    // video.style.height = "auto";
     setVideoSize();
     seekerSlider.value = 0;
     canvas.width = video.clientWidth;
