@@ -4,6 +4,7 @@ import * as MP4Box from "mp4box";
 const UPSCALE_THRESH = 1000;
 const UPSCALE_FACTOR = 2;
 const MAX_WIDTH_RATIO = 0.97;
+const INVALID_VAL = -1;
 
 
 /** @type {HTMLVideoElement} */
@@ -13,9 +14,9 @@ let isLoaded = false;
 let isMetadataLoaded = false;
 let isMp4BoxLoaded = false;
 
-let videoFps = -1;
-let frameCount = -1;
-let currentFrame = -1;
+let videoFps = INVALID_VAL;
+let frameCount = INVALID_VAL;
+let lastNotifiedFrame = INVALID_VAL;
 
 
 /** * @type {((frame: number) => void) | null} */
@@ -32,9 +33,10 @@ function init() {
     video = document.getElementById("video");
 
     video.addEventListener("loadedmetadata", onMetadataLoaded);
-    video.addEventListener("timeupdate",onTimeUpdate );
-    video.addEventListener("ended", () => {onEndedCallback?.()} );
+    video.addEventListener("timeupdate",onTimeUpdate);
+    video.addEventListener("ended", onEnded);
 }
+
 
 /**
  * 
@@ -50,6 +52,7 @@ function loadVideo(file) {
     onLoadStartedCallback?.();
     const url = URL.createObjectURL(file);
     video.src = url;
+    video.load();
 
     // all this just to get the framerate of the video
     const mp4boxFile = MP4Box.createFile();
@@ -60,7 +63,7 @@ function loadVideo(file) {
         videoFps = fps;
         frameCount = track.nb_samples;
         isMp4BoxLoaded = true;
-        checkIfVideoLoaded();
+        finishLoadingIfReady();
     };
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -78,12 +81,16 @@ function loadVideo(file) {
     reader.readAsArrayBuffer(file);
 }
 
-function onMetadataLoaded() {
-    isMetadataLoaded = true;
-    checkIfVideoLoaded();
+function onEnded() {
+    onEndedCallback?.();
 }
 
-function checkIfVideoLoaded() {
+function onMetadataLoaded() {
+    isMetadataLoaded = true;
+    finishLoadingIfReady();
+}
+
+function finishLoadingIfReady() {
     if (!isMetadataLoaded || !isMp4BoxLoaded) return;
     adjustVideoSize();
     isLoaded = true;
@@ -94,9 +101,9 @@ function notifyFrameChanged() {
     if (!onFrameChangedCallback) return;
 
     const frame = getCurrentFrame();
-    if (frame === currentFrame) return;
+    if (frame === lastNotifiedFrame) return;
 
-    currentFrame = frame;
+    lastNotifiedFrame = frame;
     onFrameChangedCallback(frame);
 }
 
@@ -110,7 +117,7 @@ function onTimeUpdate() {
  * @param {number} frame 
  */
 function setCurrentFrame(frame) {
-    video.currentTime = frame / videoFps;
+    video.currentTime = frameToTime(frame);
     notifyFrameChanged();
 }
 
@@ -144,18 +151,35 @@ function setOnFrameChanged(callback) {
 }
 
 /**
+ * @param {number} frame 
+ * @returns {number} time in seconds
+ */
+function frameToTime(frame) {
+    return frame / videoFps;
+}
+
+/**
+ * @param {number} timeSecs 
+ * @returns {number} frame number
+ */
+function timeToFrame(timeSecs) {
+    return Math.floor(timeSecs * videoFps);
+}
+/**
  *
  * @returns {number} current video frame
  */
 function getCurrentFrame() {
-    return Math.round(video.currentTime * videoFps);
+    return timeToFrame(video.currentTime);
 }
 
 function playVideo() {
+    if (!isLoaded) return;
     video.play();
 }
 
 function pauseVideo() {
+    if (!isLoaded) return;
     video.pause();
 }
 
@@ -253,20 +277,6 @@ function setVolume(volume) {
     video.volume = volume;
 }
 
-function getSource() {
-    return video.src;
-}
-
-/**
- * Sets the main source for the video player
- * @param {string} source 
- */
-function setSource(source) {
-    video.src = source;
-    video.load();
-}
-
-
 function getFrameCount() {
     return frameCount;
 }
@@ -288,8 +298,6 @@ export default {
     seekToFrame,
     seekToTime,
     setVolume,
-    getSource,
-    setSource,
     setOnFrameChanged,
     getFrameCount,
     setOnLoadStarted

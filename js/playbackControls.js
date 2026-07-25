@@ -5,11 +5,6 @@ import {PLAYBACK_BUTTON} from "./types.js";
 
 const VOLUME_SLIDER_MAX = 1000;
 
-/** @type {HTMLInputElement} */
-let fileInput;
-/** @type {HTMLInputElement} */
-let colorInput;
-
 // video controls
 /** @type {HTMLButtonElement} */
 let playPauseBtn;
@@ -24,10 +19,6 @@ let nextFrameBtn;
 
 function init() {
     // @ts-ignore
-    fileInput = document.getElementById("videoInput");
-    // @ts-ignore
-    colorInput = document.getElementById("colorPicker");
-    // @ts-ignore
     playPauseBtn = document.getElementById("playPause");
     // @ts-ignore
     seekerSlider = document.getElementById("seeker");
@@ -38,65 +29,67 @@ function init() {
     // @ts-ignore
     nextFrameBtn = document.getElementById("nextFrame");
 
-    colorInput.onchange = () => {
-        canvas.setColor(colorInput.value);
-    };
 
-    prevFrameBtn.onclick = onPrevBtnClick;
+    prevFrameBtn.addEventListener("click", onPrevBtnClick);
 
-    nextFrameBtn.onclick = onNextBtnClick;
+    nextFrameBtn.addEventListener("click", onNextBtnClick);
 
-    playPauseBtn.onclick = onPlayBtnClick;
+    playPauseBtn.addEventListener("click", onPlayBtnClick);
 
-    seekerSlider.addEventListener("input",  onSeekerSliderInput);
+    seekerSlider.addEventListener("input", onSeekerSliderInput);
 
     volumeSlider.addEventListener("input", onVolumeSliderInput);
-
-    fileInput.addEventListener("change", onFileInput);
 }
 
 function onSeekerSliderInput() {
     if (!video.isVideoLoaded()) return;
-    video.seekToTime(seekerSlider.valueAsNumber / video.getFps());
-    canvas.redrawFrameCanvas(video.getCurrentFrame());
+    video.seekToFrame(seekerSlider.valueAsNumber);
 }
 
 function onVolumeSliderInput() {
     if (!video.isVideoLoaded()) return;
+    applyVolume();
+}
+
+function applyVolume() {
     video.setVolume(volumeSlider.valueAsNumber / VOLUME_SLIDER_MAX);
 }
 
+/**
+ * 
+ * @param {number} step 
+ */
+function increaseVolume(step=10) {
+    volumeSlider.valueAsNumber = Math.min(volumeSlider.valueAsNumber + step, VOLUME_SLIDER_MAX);
+    applyVolume();
+}
+
+/**
+ * 
+ * @param {number} step 
+ */
+function decreaseVolume(step=10) {
+    volumeSlider.valueAsNumber = Math.max(volumeSlider.valueAsNumber - step, 0);
+    applyVolume();
+}
+
 function onNextBtnClick() {
-    if (video.nextFrame()) {
-        canvas.redrawFrameCanvas(video.getCurrentFrame());
-    }
+    video.nextFrame();
 }
 
 function onPrevBtnClick() {
-    if (video.previousFrame()) {
-        canvas.redrawFrameCanvas(video.getCurrentFrame());
-    }
+    video.previousFrame();
 }
 
 function onPlayBtnClick() {
     if (!video.isVideoLoaded()) return;
     if (video.isVideoPlaying()) {
         video.pauseVideo();
-        setPlayPause(PLAYBACK_BUTTON.PLAY);
+        setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);
     } else {
         video.playVideo();
-        setPlayPause(PLAYBACK_BUTTON.PAUSE);
+        setPlayPauseBtnContent(PLAYBACK_BUTTON.PAUSE);
     }
-}
-
-function onFileInput() {
-    if (!fileInput.files) {
-        alert("Please select a file");
-        return;
-    };
-    const file = fileInput.files[0];
-    if (!file) return;
-    video.loadVideo(file);
 }
 
 /**
@@ -104,14 +97,14 @@ function onFileInput() {
  * @param {number} value 
  */
 function setSeekerValue(value) {
-    seekerSlider.value = String(value);
+    seekerSlider.valueAsNumber = value;
 }
 
 /**
  * 
  * @param {PlaybackButton} value 
  */
-function setPlayPause(value) {
+function setPlayPauseBtnContent(value) {
     playPauseBtn.textContent = value;
 }
 
@@ -119,8 +112,8 @@ function setPlayPause(value) {
  * 
  * @param {number} value 
  */
-function setSeekerMax(value) {
+function setSeekerMaximum(value) {
     seekerSlider.max = String(value); 
 }
 
-export default { init, setSeekerValue, setPlayPause, setSeekerMax };
+export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume };

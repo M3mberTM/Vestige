@@ -23,21 +23,15 @@ function init() {
     // @ts-ignore
     ctx = canvas.getContext("2d");
 
-    restoreCanvasSettings();
+    applyCanvasStyle();
 
     canvas.addEventListener("mousedown", startDraw);
     canvas.addEventListener("mouseup", endDraw);
     canvas.addEventListener("mouseout", endDraw);
     canvas.addEventListener("mousemove", draw);
-    document.addEventListener("keydown", (e) => {
-        if (e.ctrlKey && e.key === "z") {
-            e.preventDefault();
-            undoStroke();
-        }
-    });
 }
 
-function restoreCanvasSettings() {
+function applyCanvasStyle() {
     ctx.lineWidth = LINE_WIDTH;
     ctx.lineCap = LINE_CAP;
     ctx.strokeStyle = color;
@@ -65,14 +59,13 @@ export function redrawFrameCanvas(frame) {
     }
 
     ctx.beginPath();
-    ctx.strokeStyle = color;
 }
 
 /**
  * Draws a singular stroke on the current canvas
  * @param {Stroke} stroke 
  */
-function drawStroke(stroke){
+function drawStroke(stroke) {
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = LINE_WIDTH;
     ctx.lineCap = LINE_CAP;
@@ -89,6 +82,7 @@ function drawStroke(stroke){
         }
     }
     ctx.stroke();
+    applyCanvasStyle();
 }
 
 /**
@@ -106,13 +100,14 @@ function getCanvasPosition(e) {
  * @param {MouseEvent} e 
  */
 function startDraw(e) {
+    if (!canDraw) return;
     drawing = true;
     currentStroke = {
         color: color,
         points: [],
     };
     ctx.beginPath();
-    const [x,y] = getCanvasPosition(e);
+    const [x, y] = getCanvasPosition(e);
     ctx.moveTo(x, y);
     draw(e);
 }
@@ -126,11 +121,7 @@ function draw(e) {
 
     const [x,y] = getCanvasPosition(e)
 
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-    if (!currentStroke) {
-        return;
-    }
+    if (!currentStroke) return; 
     currentStroke.points.push([x, y]);
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -146,7 +137,7 @@ function endDraw() {
         drawings.addFrameStroke(currentFrame, currentStroke);
     }
     currentStroke = null;
-    ctx.beginPath();
+    ctx.closePath();
 }
 
 /**
@@ -154,10 +145,8 @@ function endDraw() {
  */
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (currentStroke) {
-        const currentFrame = video.getCurrentFrame();
-        drawings.addFrameStroke(currentFrame, { color: currentStroke.color, points: []});
-    }
+    const currentFrame = video.getCurrentFrame();
+    drawings.addFrameStroke(currentFrame, { color: color, points: []});
 }
 
 /**
@@ -184,7 +173,7 @@ function setCanvasSize(size) {
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
-    restoreCanvasSettings();
+    applyCanvasStyle();
 }
 
-export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize};
+export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke};
