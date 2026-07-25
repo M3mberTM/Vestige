@@ -1,7 +1,6 @@
 /**@import {RangeInput, PlaybackButton} from "./types" */
 import canvas from "./canvas.js";
 import video from "./video.js";
-import * as MP4Box from "mp4box";
 import {PLAYBACK_BUTTON} from "./types.js";
 
 /** @type {HTMLInputElement} */
@@ -95,39 +94,7 @@ function onFileInput() {
     };
     const file = fileInput.files[0];
     if (!file) return;
-
-    if (video.isVideoLoaded()) {
-        URL.revokeObjectURL(video.getSource());
-    }
-
-    const url = URL.createObjectURL(file);
-    video.setSource(url);
-
-    // all this just to get the framerate of the video
-    const mp4boxFile = MP4Box.createFile();
-
-    mp4boxFile.onReady = (info) => {
-        const track = info.videoTracks[0];
-        const fps = (track.nb_samples * track.timescale) / track.duration;
-        video.setFps(fps);
-        seekerSlider.max = String(track.nb_samples - 1);
-    };
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        if (!e.target) return;
-        
-        const buffer = /** @type {ArrayBuffer & {fileStart: number}} */ (e.target.result);
-
-        // MP4Box requires this property for some reason
-        buffer.fileStart = 0;
-
-        mp4boxFile.appendBuffer(buffer);
-        mp4boxFile.flush();
-    };
-
-    reader.readAsArrayBuffer(file);
+    video.loadVideo(file);
 }
 
 /**
@@ -135,7 +102,8 @@ function onFileInput() {
  * @param {number} value 
  */
 function setSeekerValue(value) {
-    seekerSlider.value = String(value);
+    // @ts-ignore
+    seekerSlider.value = value;
 }
 
 /**
@@ -146,4 +114,12 @@ function setPlayPause(value) {
     playPauseBtn.textContent = value;
 }
 
-export default { init, setSeekerValue, setPlayPause };
+/**
+ * 
+ * @param {number} value 
+ */
+function setSeekerMax(value) {
+    seekerSlider.max = String(value); 
+}
+
+export default { init, setSeekerValue, setPlayPause, setSeekerMax };

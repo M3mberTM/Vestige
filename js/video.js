@@ -1,4 +1,5 @@
 /** @import {ElementSize} from "./types" */
+import * as MP4Box from "mp4box";
 
 const UPSCALE_THRESH = 1000;
 const UPSCALE_FACTOR = 2;
@@ -9,75 +10,135 @@ const MAX_WIDTH_RATIO = 0.97;
 let video;
 
 let isLoaded = false;
+let isMetadataLoaded = false;
+let isMp4BoxLoaded = false;
+
 let videoFps = -1;
 let frameCount = -1;
-// let currentFrame = -1;
-/** * @type {Function | null} */
-let onTimeChangedCallback;
-/** * @type {Function | null} */
+let currentFrame = -1;
+
+
+/** * @type {(frame: number) => void | null} */
+let onFrameChangedCallback;
+/** * @type {() => void | null} */
 let onLoadedCallback;
-/** * @type {Function | null} */
+/** * @type {() => void | null} */
 let onEndedCallback;
+/** * @type {() => void | null} */
+let onVideoLoadingCallback;
 
 function init() {
     // @ts-ignore
     video = document.getElementById("video");
 
-    video.addEventListener("loadedmetadata", () => {
-        onLoadedMetadata();
-    });
-
-    video.addEventListener("timeupdate", () => {
-        // seekerSlider.value = Math.round(video.currentTime * videoFps);
-        // getFrameStrokes();
-        onTimeUpdate();
-    });
-
-    video.addEventListener("ended", () => {
-        // playPauseBtn.textContent = "Play";
-        onEnded();
-    });
-}
-
-function onEnded() {
-    if (onEndedCallback) {
-        onEndedCallback();
-    }
-}
-
-function onLoadedMetadata() {
-    adjustVideoSize();
-    isLoaded = true;
-    if (onLoadedCallback) {
-        onLoadedCallback();
-    }
-}
-
-function onTimeUpdate() {
-    if (onTimeChangedCallback) {
-        onTimeChangedCallback();
-    }
+    video.addEventListener("loadedmetadata", onMetadataLoaded);
+    video.addEventListener("timeupdate",onTimeUpdate );
+    video.addEventListener("ended", () => {onEndedCallback?.()} );
 }
 
 /**
- * @param {Function} callback
+ * 
+ * @param {File} file 
+ */
+function loadVideo(file) {
+    if (isLoaded) {
+        URL.revokeObjectURL(video.src);
+    }
+    isLoaded = false;
+    onVideoLoadingCallback?.();
+    const url = URL.createObjectURL(file);
+    video.src = url;
+
+    // all this just to get the framerate of the video
+    const mp4boxFile = MP4Box.createFile();
+
+    mp4boxFile.onReady = (info) => {
+        const track = info.videoTracks[0];
+        const fps = (track.nb_samples * track.timescale) / track.duration;
+        videoFps = fps;
+        frameCount = track.nb_samples;
+        isMp4BoxLoaded = true;
+        checkIfVideoLoaded();
+    };
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (!e.target) return;
+        
+        const buffer = /** @type {ArrayBuffer & {fileStart: number}} */ (e.target.result);
+
+        // MP4Box requires this property for some reason
+        buffer.fileStart = 0;
+
+        mp4boxFile.appendBuffer(buffer);
+        mp4boxFile.flush();
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function onMetadataLoaded() {
+    isMetadataLoaded = true;
+    checkIfVideoLoaded();
+}
+
+function checkIfVideoLoaded() {
+    if (!isMetadataLoaded || !isMp4BoxLoaded) return;
+    adjustVideoSize();
+    isLoaded = true;
+    onLoadedCallback?.();
+}
+
+function notifyFrameChanged() {
+    if (!onFrameChangedCallback) return;
+
+    const frame = getCurrentFrame();
+    if (frame === currentFrame) return;
+
+    currentFrame = frame;
+    onFrameChangedCallback(frame);
+}
+
+function onTimeUpdate() {
+    notifyFrameChanged();
+}
+
+
+/**
+ * Sets the video to the frame given. Notifies of the frame change
+ * @param {number} frame 
+ */
+function setCurrentFrame(frame) {
+    video.currentTime = frame / videoFps;
+    notifyFrameChanged();
+}
+
+/**
+ * @param {() => void} callback
  */
 function setOnLoaded(callback) {
     onLoadedCallback = callback;
 }
 
 /**
- * @param {Function} callback
+ * @param {() => void} callback
  */
 function setOnEnded(callback) {
     onEndedCallback = callback;
 }
 
 /**
- * @param {Function} callback
+ * 
+ * @param {() => void} callback 
  */
-function setOnTimeChanged(callback) {
-    onTimeChangedCallback = callback;
+function setOnVideoLoading(callback) {
+    onVideoLoadingCallback = callback;
+}
+
+/**
+ * @param {(frame: number)=>void} callback
+ */
+function setOnFrameChanged(callback) {
+    onFrameChangedCallback = callback;
 }
 
 /**
@@ -96,18 +157,20 @@ function pauseVideo() {
     video.pause();
 }
 
-/**
- *
- * @param {number} frame
- */
-function seekToFrame(frame) {}
 
 /**
- *
+ * @param {number} frame
+ */
+function seekToFrame(frame) {
+    setCurrentFrame(frame);
+}
+
+/**
  * @param {number} timeSecs
  */
 function seekToTime(timeSecs) {
     video.currentTime = timeSecs;
+    notifyFrameChanged();
 }
 
 /**
@@ -115,7 +178,7 @@ function seekToTime(timeSecs) {
  */
 function nextFrame() {
     if (video.currentTime < video.duration) {
-        video.currentTime += 1 / videoFps;
+        setCurrentFrame(getCurrentFrame() + 1);
         return true;
     }
     return false;
@@ -126,7 +189,7 @@ function nextFrame() {
  */
 function previousFrame() {
     if (video.currentTime > 0) {
-        video.currentTime -= 1 / videoFps;
+        setCurrentFrame(getCurrentFrame() - 1);
         return true;
     }
     return false;
@@ -137,10 +200,6 @@ function getFps() {
     return videoFps;
 }
 
-function getFrameCount() {
-    if (frameCount === -1) throw new Error("No video loaded");
-    return frameCount;
-}
 
 function adjustVideoSize() {
     let displayWidth = video.videoWidth;
@@ -180,13 +239,6 @@ function isVideoLoaded() {
     return isLoaded;
 }
 
-/**
- * @param {boolean} isLoading 
- */
-function setVideoisLoading(isLoading) {
-    isLoaded = isLoading;
-}
-
 function isVideoPlaying() {
     return !video.paused;
 }
@@ -212,27 +264,22 @@ function setSource(source) {
     video.load();
 }
 
-/**
- * 
- * @param {number} fps 
- */
-function setFps(fps) {
-    videoFps = fps;
+
+function getFrameCount() {
+    return frameCount;
 }
 
 export default {
+    loadVideo,
     getCurrentFrame,
     init,
     setOnEnded,
-    setOnTimeChanged,
     setOnLoaded,
     getFps,
-    getFrameCount,
     previousFrame,
     nextFrame,
     getVideoSize,
     isVideoLoaded,
-    setVideoisLoading,
     isVideoPlaying,
     playVideo,
     pauseVideo,
@@ -241,5 +288,7 @@ export default {
     setVolume,
     getSource,
     setSource,
-    setFps
+    setOnFrameChanged,
+    getFrameCount,
+    setOnVideoLoading
 };

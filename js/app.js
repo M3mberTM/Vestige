@@ -3,24 +3,32 @@ import canvas from "./canvas.js";
 import video from "./video.js";
 import controls from "./controls.js";
 
-canvas.init();
 video.init();
+canvas.init();
 controls.init();
 
 video.setOnLoaded(onVideoLoad);
-video.setOnTimeChanged(onVideoUpdate);
+video.setOnFrameChanged(onFrameChange);
 video.setOnEnded(onVideoEnd);
+video.setOnVideoLoading(onVideoLoading);
 
-function onVideoLoad() {
-    const videoSize = video.getVideoSize();
-    canvas.setCanvasSize(videoSize);
-    canvas.setCanDraw(true);
-    controls.setSeekerValue(0);
+function onVideoLoading() {
+    canvas.setCanDraw(false);
 }
 
-function onVideoUpdate() {
-    controls.setSeekerValue(video.getCurrentFrame());
-    canvas.redrawFrameCanvas(video.getCurrentFrame());
+function onVideoLoad() {
+    canvas.setCanvasSize(video.getVideoSize());
+    canvas.setCanDraw(true);
+    controls.setSeekerValue(0);
+    controls.setSeekerMax(video.getFrameCount() - 1);
+}
+
+/**
+ * @param {number} frame 
+ */
+function onFrameChange(frame) {
+    controls.setSeekerValue(frame);
+    canvas.redrawFrameCanvas(frame);
 }
 
 function onVideoEnd() {
