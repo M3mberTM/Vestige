@@ -18,14 +18,14 @@ let frameCount = -1;
 let currentFrame = -1;
 
 
-/** * @type {(frame: number) => void | null} */
-let onFrameChangedCallback;
-/** * @type {() => void | null} */
-let onLoadedCallback;
-/** * @type {() => void | null} */
-let onEndedCallback;
-/** * @type {() => void | null} */
-let onVideoLoadingCallback;
+/** * @type {((frame: number) => void) | null} */
+let onFrameChangedCallback = null;
+/** * @type {(() => void) | null} */
+let onLoadedCallback = null;
+/** * @type {(() => void) | null} */
+let onEndedCallback = null;
+/** * @type {(() => void) | null} */
+let onLoadStartedCallback = null;
 
 function init() {
     // @ts-ignore
@@ -45,7 +45,9 @@ function loadVideo(file) {
         URL.revokeObjectURL(video.src);
     }
     isLoaded = false;
-    onVideoLoadingCallback?.();
+    isMetadataLoaded = false;
+    isMp4BoxLoaded = false;
+    onLoadStartedCallback?.();
     const url = URL.createObjectURL(file);
     video.src = url;
 
@@ -130,8 +132,8 @@ function setOnEnded(callback) {
  * 
  * @param {() => void} callback 
  */
-function setOnVideoLoading(callback) {
-    onVideoLoadingCallback = callback;
+function setOnLoadStarted(callback) {
+    onLoadStartedCallback = callback;
 }
 
 /**
@@ -290,5 +292,5 @@ export default {
     setSource,
     setOnFrameChanged,
     getFrameCount,
-    setOnVideoLoading
+    setOnLoadStarted
 };

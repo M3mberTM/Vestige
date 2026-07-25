@@ -1,6 +1,6 @@
 import drawings from "./drawings";
 import video from "./video";
-/** @import {Stroke, ElementSize} from "./types" */
+/** @import {Stroke, ElementSize, HexColor} from "./types" */
 
 /** @type {HTMLCanvasElement} */
 let canvas;
@@ -23,9 +23,7 @@ function init() {
     // @ts-ignore
     ctx = canvas.getContext("2d");
 
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-    ctx.strokeStyle = color;
+    restoreCanvasSettings();
 
     canvas.addEventListener("mousedown", startDraw);
     canvas.addEventListener("mouseup", endDraw);
@@ -37,6 +35,12 @@ function init() {
             undoStroke();
         }
     });
+}
+
+function restoreCanvasSettings() {
+    ctx.lineWidth = LINE_WIDTH;
+    ctx.lineCap = LINE_CAP;
+    ctx.strokeStyle = color;
 }
 
 /**
@@ -164,7 +168,7 @@ function setCanDraw(value) { canDraw = value; }
 
 /**
  * 
- * @param {string} newColor 
+ * @param {HexColor} newColor 
  */
 function setColor(newColor) {
     color = newColor;
@@ -180,7 +184,7 @@ function setCanvasSize(size) {
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
-    ctx.strokeStyle = color;
+    restoreCanvasSettings();
 }
 
 export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize};

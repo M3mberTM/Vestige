@@ -18,6 +18,11 @@
  */
 
 /**
+ * Hex color represented as # followed by 6 characters of hex value
+ * @typedef {string} HexColor
+ */
+
+/**
  * @typedef {HTMLInputElement & {
  * valueAsNumber: number
  * }} RangeInput

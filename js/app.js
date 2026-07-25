@@ -3,16 +3,21 @@ import canvas from "./canvas.js";
 import video from "./video.js";
 import controls from "./controls.js";
 
-video.init();
-canvas.init();
-controls.init();
 
-video.setOnLoaded(onVideoLoad);
-video.setOnFrameChanged(onFrameChange);
-video.setOnEnded(onVideoEnd);
-video.setOnVideoLoading(onVideoLoading);
+init();
 
-function onVideoLoading() {
+function init() {
+    video.init();
+    canvas.init();
+    controls.init();
+
+    video.setOnLoaded(onVideoLoad);
+    video.setOnFrameChanged(onFrameChange);
+    video.setOnEnded(onVideoEnd);
+    video.setOnLoadStarted(onVideoLoadingStarted);
+}
+
+function onVideoLoadingStarted() {
     canvas.setCanDraw(false);
 }
 

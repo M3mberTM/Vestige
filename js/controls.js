@@ -3,6 +3,8 @@ import canvas from "./canvas.js";
 import video from "./video.js";
 import {PLAYBACK_BUTTON} from "./types.js";
 
+const VOLUME_SLIDER_MAX = 1000;
+
 /** @type {HTMLInputElement} */
 let fileInput;
 /** @type {HTMLInputElement} */
@@ -61,7 +63,7 @@ function onSeekerSliderInput() {
 
 function onVolumeSliderInput() {
     if (!video.isVideoLoaded()) return;
-    video.setVolume(volumeSlider.valueAsNumber / 1000);
+    video.setVolume(volumeSlider.valueAsNumber / VOLUME_SLIDER_MAX);
 }
 
 function onNextBtnClick() {
@@ -102,8 +104,7 @@ function onFileInput() {
  * @param {number} value 
  */
 function setSeekerValue(value) {
-    // @ts-ignore
-    seekerSlider.value = value;
+    seekerSlider.value = String(value);
 }
 
 /**
