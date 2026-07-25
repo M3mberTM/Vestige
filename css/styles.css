@@ -2,6 +2,7 @@
     --background: #0C0D0F;
     --foreground: #fefcfb;
     --highlight: #1282a2;
+    --highlight2: #4fb286;
     --muted: #14171B;
 }
 
@@ -9,12 +10,28 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100vh;
     width: 100vw;
     margin: 0;
     background-color: var(--background);
     color: var(--foreground);
+    overflow-x: hidden; /* Hide horizontal scrollbar */
 }
+
+.button {
+    background-color: var(--highlight);
+    border: none;
+    color: var(--foreground);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+
 .content {
     display: flex;
     flex-direction: column;
@@ -24,9 +41,22 @@ body {
 
 .setup {
     display: flex;
-    flex-direction: column;
-    width: 200px;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
     padding: 10px 5px;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+}
+
+.subOptions {
+    display: flex;
+    justify-content: end;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .main {
@@ -42,7 +72,12 @@ body {
     width: 100%
 }
 
-.seeker {
+.timeline {
+    width: 100%;
+}
+
+#markers {
+    height: 15px;
     width: 100%;
 }
 
@@ -59,6 +94,10 @@ body {
     gap: 10px;
 }
 
+#videoInput {
+    display: none;
+}
+
 .viewer {
     position: relative;
     display: inline-block;
@@ -66,14 +105,14 @@ body {
 }
 
 .viewerContent {
-    width: 97vw;
-    height: 500px;
     max-width: 97vw;
     max-height: 80vh;
 }
 
 #video {
-    object-fit: contain;
+    width: 97vw;
+    height: 500px;
+    object-fit: fill;
     background: black;
 }
 
@@ -95,4 +134,50 @@ body {
     height: 10px;
     background: var(--highlight);
     cursor: pointer;
+}
+
+.colorPicker {
+    background-color: var(--highlight2);
+    border: none;
+    margin: 4px 2px;
+    border-radius: 2px;
+    height: 40px;
+    width: 40px;
+    font-size: 16px;
+}
+
+.colorPicker::-webkit-color-swatch {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: var(--highlight2);
+}
+
+.colorPicker::-webkit-color-swatch-wrapper {
+    padding: 4px 2px;
+    border: none;
+    margin: 0;
+    background-color: var(--highlight2);
+}
+
+.iconButton {
+    background-color: var(--highlight);
+    border: none;
+    color: var(--foreground);
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.secondary {
+    background-color: var(--highlight2);
+}
+
+.arrow {
+    padding: 9px 14px;
 }

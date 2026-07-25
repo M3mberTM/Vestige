@@ -1,44 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Frame by frame drawing</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frame by frame drawing</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=brush" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=title" />
 </head>
 <link rel="stylesheet" href="css/styles.css">
+
 <body>
-	<div class="content">
-		<div class="setup">
-			<input type="file" id="videoInput" accept="video/*">
-            <button id="clearCanvasBtn">Clear canvas</button>
-            <input type="color" id="colorPicker" value="#000000">
-		</div>
+    <div class="content">
+        <div class="setup">
+            <div class="options" id="fileOptions">
+                <input type="file" id="videoInput" accept="video/*">
+                <button class="button" id="videoInputBtn">Choose File</button>
+                <button class="button" id="exportBtn">Export As...</button>
+            </div>
+            <div class="options" id="canvasOptions">
+                <div class="subOptions">
+                    <button id="clearCanvasBtn" class="button secondary">Clear canvas</button>
+                </div>
+                <div class="subOptions">
+                    <button class="iconButton secondary">
+                        <span class="material-symbols-outlined">
+                            brush
+                        </span>
+                    </button>
+                    <button class="iconButton secondary">
+                        <span class="material-symbols-outlined">
+                            title
+                        </span>
+                    </button>
+                    <input type="color" id="colorPicker" value="#000000" class="colorPicker">
+                </div>
+            </div>
+        </div>
         <div class="main">
             <div class="viewer">
                 <video id="video" class="viewerContent"></video>
                 <canvas id="canvas" class="viewerContent"></canvas>
             </div>
+            <div class="controlsContainer">
+                <div class="timeline">
+                    <div id="markers"></div>
+                    <input id="seeker" class="slider" type="range" min="0" max="1000" value="0">
+                </div>
+                <div class="videoControls">
+                    <div class="playbackControls">
+                        <button id="playPause" class="buttonControls button">Play</button>
+                        <button id="prevFrame" class="buttonControls button arrow">◀</button>
+                                <button id="nextFrame" class="buttonControls button arrow">▶</button>
+                    </div>
+                    <div class="volumeControls">
+                        <input id="volumeSlider" class="slider" type="range" min="0" max="1000" value="1000">
+                    </div>
+                </div>
+            </div>
         </div>
-		<div class="controlsContainer">
-            <div class="seeker">
-                <input id="seeker" class="slider" type="range" min="0" max="1000" value="0">
-            </div>
-            <div class="videoControls">
-                <div class="playbackControls">
-                    <button id="playPause" class="buttonControls">Play</button>
-                    <button id="prevFrame" class="buttonControls">◀</button>
-                    <button id="nextFrame" class="buttonControls">▶</button>
-                </div>
-                <div class="volumeControls">
-                    <input id="volumeSlider" class="slider" type="range" min="0" max="1000" value="1000">
-                </div>
-            </div>
-		</div>
-	
-	</div>
 
-<!-- <script src="https://cdn.jsdelivr.net/npm/mp4box@0.5.4/dist/mp4box.all.min.js"></script> -->
-<script src="build/bundle.js"></script>
+    </div>
+
+    <script src="build/bundle.js"></script>
 
 </body>
+
 </html>

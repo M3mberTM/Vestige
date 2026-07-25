@@ -2,12 +2,21 @@ import video from "./video.js";
 
 /** @type {HTMLInputElement} */
 let fileInput;
+/** @type {HTMLButtonElement} */
+let fileInputBtn;
 
 function init() {
     // @ts-ignore
     fileInput = document.getElementById("videoInput");
+    // @ts-ignore
+    fileInputBtn = document.getElementById("videoInputBtn");
 
     fileInput.addEventListener("change", onFileInput);
+    fileInputBtn.addEventListener("click", onFileInputBtnClick);
+}
+
+function onFileInputBtnClick() {
+    fileInput.click();
 }
 
 function onFileInput() {

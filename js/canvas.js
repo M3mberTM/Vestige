@@ -79,9 +79,9 @@ function drawStroke(stroke) {
             ctx.moveTo(p[0], p[1]);
         } else {
             ctx.lineTo(p[0], p[1]);
+            ctx.stroke();
         }
     }
-    ctx.stroke();
     applyCanvasStyle();
 }
 

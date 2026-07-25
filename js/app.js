@@ -35,8 +35,13 @@ function onKeyDown(event) {
 }
 
 function toggleVideoPlayback() {
-    if (video.isVideoPlaying()) video.pauseVideo();
-    else video.playVideo();
+    if (video.isVideoPlaying()) {
+        video.pauseVideo();
+        playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);
+    } else {
+        video.playVideo();
+        playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PAUSE);
+    }
 }
 
 function onVideoLoadingStarted() {

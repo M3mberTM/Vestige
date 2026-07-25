@@ -4,6 +4,7 @@ import video from "./video.js";
 import {PLAYBACK_BUTTON} from "./types.js";
 
 const VOLUME_SLIDER_MAX = 1000;
+const VOLUME_STEP = 20;
 
 // video controls
 /** @type {HTMLButtonElement} */
@@ -55,21 +56,13 @@ function applyVolume() {
     video.setVolume(volumeSlider.valueAsNumber / VOLUME_SLIDER_MAX);
 }
 
-/**
- * 
- * @param {number} step 
- */
-function increaseVolume(step=10) {
-    volumeSlider.valueAsNumber = Math.min(volumeSlider.valueAsNumber + step, VOLUME_SLIDER_MAX);
+function increaseVolume() {
+    volumeSlider.valueAsNumber = Math.min(volumeSlider.valueAsNumber + VOLUME_STEP, VOLUME_SLIDER_MAX);
     applyVolume();
 }
 
-/**
- * 
- * @param {number} step 
- */
-function decreaseVolume(step=10) {
-    volumeSlider.valueAsNumber = Math.max(volumeSlider.valueAsNumber - step, 0);
+function decreaseVolume() {
+    volumeSlider.valueAsNumber = Math.max(volumeSlider.valueAsNumber - VOLUME_STEP, 0);
     applyVolume();
 }
 

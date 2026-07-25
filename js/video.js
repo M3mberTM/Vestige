@@ -17,6 +17,7 @@ let isMp4BoxLoaded = false;
 let videoFps = INVALID_VAL;
 let frameCount = INVALID_VAL;
 let lastNotifiedFrame = INVALID_VAL;
+let currentFrame = INVALID_VAL;
 
 
 /** * @type {((frame: number) => void) | null} */
@@ -49,6 +50,8 @@ function loadVideo(file) {
     isLoaded = false;
     isMetadataLoaded = false;
     isMp4BoxLoaded = false;
+    currentFrame = 0;
+    lastNotifiedFrame = INVALID_VAL;
     onLoadStartedCallback?.();
     const url = URL.createObjectURL(file);
     video.src = url;
@@ -117,6 +120,7 @@ function onTimeUpdate() {
  * @param {number} frame 
  */
 function setCurrentFrame(frame) {
+    currentFrame = frame;
     video.currentTime = frameToTime(frame);
     notifyFrameChanged();
 }
@@ -180,6 +184,7 @@ function playVideo() {
 
 function pauseVideo() {
     if (!isLoaded) return;
+    setCurrentFrame(timeToFrame(video.currentTime));
     video.pause();
 }
 
@@ -196,6 +201,7 @@ function seekToFrame(frame) {
  */
 function seekToTime(timeSecs) {
     video.currentTime = timeSecs;
+    currentFrame = timeToFrame(timeSecs);
     notifyFrameChanged();
 }
 
@@ -203,22 +209,20 @@ function seekToTime(timeSecs) {
  * @returns {boolean} true if the video changed to next frame
  */
 function nextFrame() {
-    if (video.currentTime < video.duration) {
-        setCurrentFrame(getCurrentFrame() + 1);
-        return true;
-    }
-    return false;
+    if (currentFrame >= frameCount - 1) return false;
+    if (!video.paused) pauseVideo();
+    setCurrentFrame(currentFrame+1);
+    return true;
 }
 
 /**
  * @returns {boolean} true if the video changed to previous frame
  */
 function previousFrame() {
-    if (video.currentTime > 0) {
-        setCurrentFrame(getCurrentFrame() - 1);
-        return true;
-    }
-    return false;
+    if (currentFrame <= 0) return false;
+    if (!video.paused) pauseVideo();
+    setCurrentFrame(currentFrame-1);
+    return true;
 }
 
 function getFps() {
@@ -239,7 +243,7 @@ function adjustVideoSize() {
     const maxWidth = window.innerWidth * MAX_WIDTH_RATIO;
 
     if (displayWidth > maxWidth) {
-        const scale = maxWidth / displayWidth;
+        const scale = Math.floor((maxWidth / displayWidth) * 100) / 100;
         displayWidth *= scale;
         displayHeight *= scale;
     }
