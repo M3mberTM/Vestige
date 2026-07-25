@@ -7,7 +7,7 @@ const frameStrokes = new Map();
  * @param {number} frame
  * @returns {Stroke[]}
 */
-export function getFrameStrokes(frame) {
+function getFrameStrokes(frame) {
     return frameStrokes.get(frame) ?? [];
 }
 
@@ -16,7 +16,7 @@ export function getFrameStrokes(frame) {
  * 
  * @param {number} frame 
  */
-export function removeLastStroke(frame) {
+function removeLastStroke(frame) {
     if (!frameStrokes.has(frame)) return;
     frameStrokes.get(frame).pop();
 }
@@ -26,9 +26,11 @@ export function removeLastStroke(frame) {
  * @param {number} frame 
  * @param {Stroke} stroke 
  */
-export function addFrameStroke(frame, stroke) {
+function addFrameStroke(frame, stroke) {
     if (!frameStrokes.has(frame)) {
         frameStrokes.set(frame, []);
     };
     frameStrokes.get(frame).push(stroke);
 }
+
+export default {getFrameStrokes, removeLastStroke, addFrameStroke};

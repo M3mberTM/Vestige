@@ -1,6 +1,6 @@
-import { getFrameStrokes, addFrameStroke, removeLastStroke } from "./drawing";
-import { getCurrentFrame } from "./video";
-/** @import {Stroke} from "./types" */
+import drawings from "./drawings";
+import video from "./video";
+/** @import {Stroke, ElementSize} from "./types" */
 
 /** @type {HTMLCanvasElement} */
 let canvas;
@@ -17,7 +17,7 @@ const LINE_CAP = "round";
 /**
  * Sets up the website canvas properly and adds event listeners
  */
-export function initCanvas() {
+function init() {
     // @ts-ignore
     canvas = document.getElementById("canvas");
     // @ts-ignore
@@ -37,10 +37,6 @@ export function initCanvas() {
             undoStroke();
         }
     });
-    // technically can work on phone?
-    // canvas.addEventListener("touchstart", startDraw);
-    // canvas.addEventListener("touchend", endDraw);
-    // canvas.addEventListener("touchmove", draw);
 }
 
 /**
@@ -48,8 +44,8 @@ export function initCanvas() {
  */
 function undoStroke() {
 
-    const currentFrame = getCurrentFrame();
-    removeLastStroke(currentFrame);
+    const currentFrame = video.getCurrentFrame();
+    drawings.removeLastStroke(currentFrame);
     redrawFrameCanvas(currentFrame);
 }
 
@@ -59,7 +55,7 @@ function undoStroke() {
  */
 export function redrawFrameCanvas(frame) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const strokes = getFrameStrokes(frame);
+    const strokes = drawings.getFrameStrokes(frame);
     for (const stroke of strokes) {
         drawStroke(stroke);
     }
@@ -142,8 +138,8 @@ function draw(e) {
 function endDraw() {
     drawing = false;
     if (currentStroke) {
-        const currentFrame = getCurrentFrame();
-        addFrameStroke(currentFrame, currentStroke);
+        const currentFrame = video.getCurrentFrame();
+        drawings.addFrameStroke(currentFrame, currentStroke);
     }
     currentStroke = null;
     ctx.beginPath();
@@ -152,11 +148,11 @@ function endDraw() {
 /**
  * Removes everything that is on the canvas. Records the clear operation so that undo can be used
  */
-export function clearCanvas() {
+function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (currentStroke) {
-        const currentFrame = getCurrentFrame();
-        addFrameStroke(currentFrame, { color: currentStroke.color, points: []});
+        const currentFrame = video.getCurrentFrame();
+        drawings.addFrameStroke(currentFrame, { color: currentStroke.color, points: []});
     }
 }
 
@@ -164,13 +160,27 @@ export function clearCanvas() {
  * 
  * @param {boolean} value 
  */
-export function setCanDraw(value) { canDraw = value; }
+function setCanDraw(value) { canDraw = value; }
 
 /**
  * 
  * @param {string} newColor 
  */
-export function setColor(newColor) {
+function setColor(newColor) {
     color = newColor;
     ctx.strokeStyle = color;
 }
+
+/**
+ * 
+ * @param {ElementSize} size 
+ */
+function setCanvasSize(size) {
+    canvas.width = size.width;
+    canvas.height = size.height;
+    canvas.style.width = size.width + "px";
+    canvas.style.height = size.height + "px";
+    ctx.strokeStyle = color;
+}
+
+export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize};
