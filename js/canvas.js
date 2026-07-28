@@ -1,6 +1,6 @@
 import drawings from "./drawings";
 import video from "./video";
-/** @import {Stroke, ElementSize, HexColor} from "./types" */
+/** @import {Stroke, ElementSize, HexColor, Point} from "./types" */
 
 /** @type {HTMLCanvasElement} */
 let canvas;
@@ -11,6 +11,9 @@ let drawing = false;
 /** @type {Stroke | null} */
 let currentStroke = null;
 let color = "#000000";
+let canvasWidth = 0;
+let canvasHeight = 0;
+
 const LINE_WIDTH = 3;
 const LINE_CAP = "round";
 
@@ -29,6 +32,25 @@ function init() {
     canvas.addEventListener("mouseup", endDraw);
     canvas.addEventListener("mouseout", endDraw);
     canvas.addEventListener("mousemove", draw);
+}
+
+/**
+ * Converts point to pixels representing the x and y coordinates
+ * @param {Point} point 
+ * @returns {[number, number]} x, y relative to the canvas
+ */
+function pointToPixels(point) {
+    return [point[0] * canvasWidth, point[1] * canvasHeight];
+}
+
+/**
+ * 
+ * @param {number} x x coordinate of the point relative to the canvas
+ * @param {number} y y coordinate of the point relative to the canvas
+ * @returns {Point}
+ */
+function pixelsToPoint(x, y) {
+    return [x / canvasWidth, y / canvasHeight];
 }
 
 function applyCanvasStyle() {
@@ -73,7 +95,7 @@ function drawStroke(stroke) {
     ctx.beginPath();
 
     for (let i = 0; i < stroke.points.length; i++) {
-        const p = stroke.points[i];
+        const p = pointToPixels(stroke.points[i]);
 
         if (i === 0) {
             ctx.moveTo(p[0], p[1]);
@@ -122,7 +144,7 @@ function draw(e) {
     const [x,y] = getCanvasPosition(e)
 
     if (!currentStroke) return; 
-    currentStroke.points.push([x, y]);
+    currentStroke.points.push(pixelsToPoint(x, y));
     ctx.lineTo(x, y);
     ctx.stroke();
 }
@@ -173,6 +195,8 @@ function setCanvasSize(size) {
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
+    canvasWidth = size.width;
+    canvasHeight = size.height;
     applyCanvasStyle();
 }
 

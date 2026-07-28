@@ -9,6 +9,8 @@ const INVALID_VAL = -1;
 
 /** @type {HTMLVideoElement} */
 let video;
+/** @type {File | null} */
+let loadedFile = null;
 
 let isLoaded = false;
 let isMetadataLoaded = false;
@@ -18,6 +20,9 @@ let videoFps = INVALID_VAL;
 let frameCount = INVALID_VAL;
 let lastNotifiedFrame = INVALID_VAL;
 let currentFrame = INVALID_VAL;
+/** @type {number[]} */
+const frameTimes = [];
+let videoTimescale = INVALID_VAL;
 
 
 /** * @type {((frame: number) => void) | null} */
@@ -56,19 +61,33 @@ function loadVideo(file) {
     const url = URL.createObjectURL(file);
     video.src = url;
     video.load();
+    loadedFile = file;
 
     // all this just to get the framerate of the video
     const mp4boxFile = MP4Box.createFile();
-
     mp4boxFile.onReady = (info) => {
         const track = info.videoTracks[0];
         const fps = (track.nb_samples * track.timescale) / track.duration;
+        videoTimescale = track.timescale
+        mp4boxFile.setExtractionOptions(track.id, null, { nbSamples: Infinity});
+        mp4boxFile.start();
         videoFps = fps;
-        frameCount = track.nb_samples;
+    };
+
+    mp4boxFile.onSamples = (id, user, samples) => {
+        frameTimes.push(0);
+        for (const sample of samples) {
+            frameTimes.push(sample.cts / videoTimescale);
+        }
+        frameTimes.sort((a, b) => a - b);
+        frameTimes[frameTimes.length-1] = video.duration;
+        frameCount = frameTimes.length;
         isMp4BoxLoaded = true;
         finishLoadingIfReady();
-    };
+    }
+
     const reader = new FileReader();
+    // @ts-ignore
     reader.onload = (e) => {
         if (!e.target) return;
         
@@ -159,7 +178,7 @@ function setOnFrameChanged(callback) {
  * @returns {number} time in seconds
  */
 function frameToTime(frame) {
-    return frame / videoFps;
+    return frameTimes[frame];
 }
 
 /**
@@ -167,7 +186,10 @@ function frameToTime(frame) {
  * @returns {number} frame number
  */
 function timeToFrame(timeSecs) {
-    return Math.floor(timeSecs * videoFps);
+    const EPSILON = 0.00001;
+    let frame = 0;
+    while (frame + 1 < frameTimes.length && frameTimes[frame + 1] <= timeSecs + EPSILON) frame++;
+    return frame;
 }
 /**
  *
@@ -285,6 +307,12 @@ function getFrameCount() {
     return frameCount;
 }
 
+function getVideoFile() {
+    if (!isLoaded) return null;
+    return loadedFile;
+}
+
+
 export default {
     loadVideo,
     getCurrentFrame,
@@ -304,5 +332,6 @@ export default {
     setVolume,
     setOnFrameChanged,
     getFrameCount,
-    setOnLoadStarted
+    setOnLoadStarted,
+    getVideoFile
 };

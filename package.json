@@ -13,6 +13,7 @@
     "esbuild": "^0.28.1"
   },
   "dependencies": {
+    "jszip": "^3.10.1",
     "mp4box": "^2.4.1"
   }
 }

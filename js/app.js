@@ -59,6 +59,7 @@ function onVideoLoad() {
  * @param {number} frame 
  */
 function onFrameChange(frame) {
+    console.log(frame);
     playbackControls.setSeekerValue(frame);
     canvas.redrawFrameCanvas(frame);
 }

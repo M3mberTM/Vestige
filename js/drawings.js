@@ -33,4 +33,22 @@ function addFrameStroke(frame, stroke) {
     frameStrokes.get(frame).push(stroke);
 }
 
-export default {getFrameStrokes, removeLastStroke, addFrameStroke};
+/**
+ * @returns all the strokes on every single frame
+ */
+function exportStrokes() {
+    return Object.fromEntries(frameStrokes);
+}
+
+/**
+ * 
+ * @param {JSON} data 
+ */
+function importStrokes(data) {
+    frameStrokes.clear();
+    for (const [frame, strokes] of Object.entries(data)) {
+        frameStrokes.set(Number(frame), strokes);
+    }
+}
+
+export default {getFrameStrokes, removeLastStroke, addFrameStroke, exportStrokes, importStrokes};
