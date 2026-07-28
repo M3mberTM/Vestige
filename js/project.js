@@ -1,6 +1,7 @@
 import video from "./video.js";
 import drawings from "./drawings.js";
 import JSZip from "jszip";
+import { FILE_EXTENSION } from "./constants.js";
 
 
 async function saveProject() {
@@ -11,11 +12,23 @@ async function saveProject() {
 
     const blob = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "project.vsie";
-    a.click();
-    URL.revokeObjectURL(url);
+
+    // @ts-ignore
+    const handle = await window.showSaveFilePicker({
+        suggestedName: "project" + FILE_EXTENSION,
+        types: [
+            {
+                description: "Vestige Project",
+                accept: {
+                    "application/x-myproject": [FILE_EXTENSION]
+                }
+            }
+        ]
+    });
+
+    const writable = await handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
 }
 
 /**

@@ -4,6 +4,7 @@
     --highlight: #1282a2;
     --highlight2: #4fb286;
     --muted: #14171B;
+    --thumb-size: 10px;
 }
 
 body {
@@ -15,6 +16,8 @@ body {
     background-color: var(--background);
     color: var(--foreground);
     overflow-x: hidden; /* Hide horizontal scrollbar */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .button {
@@ -72,11 +75,17 @@ body {
 
 .timeline {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
 #markers {
     height: 15px;
-    width: 100%;
+    width: -webkit-fill-available;
+    margin-left: calc(var(--thumb-size)/2);
+    margin-right: calc(var(--thumb-size)/2);
 }
 
 #seeker {
@@ -110,7 +119,7 @@ body {
 #video {
     width: 97vw;
     height: 500px;
-    object-fit: fill;
+    object-fit: contain;
     background: black;
 }
 
@@ -126,37 +135,22 @@ body {
     background: var(--muted);
     border-radius: 20px;
 }
+
+.slider:focus {
+    outline: none;
+}
+
+.slider:focus::-webkit-slider-thumb { 
+    outline: none;
+}
+
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
     background: var(--highlight);
     cursor: pointer;
 }
-
-/* .colorPicker {
-    background-color: var(--highlight2);
-    border: none;
-    margin: 4px 2px;
-    border-radius: 2px;
-    height: 40px;
-    width: 40px;
-    font-size: 16px;
-} */
-
-/* .colorPicker::-webkit-color-swatch {
-    border: none;
-    padding: 0;
-    margin: 0;
-    background-color: var(--highlight2);
-}
-
-.colorPicker::-webkit-color-swatch-wrapper {
-    padding: 4px 2px;
-    border: none;
-    margin: 0;
-    background-color: var(--highlight2);
-} */
 
 .iconButton {
     background-color: var(--highlight);

@@ -1,5 +1,4 @@
 /**@import {RangeInput, PlaybackButton} from "./types" */
-import canvas from "./canvas.js";
 import video from "./video.js";
 import {PLAYBACK_BUTTON} from "./types.js";
 
@@ -30,7 +29,13 @@ function init() {
     // @ts-ignore
     nextFrameBtn = document.getElementById("nextFrame");
 
-
+    seekerSlider.addEventListener("keydown", (e) => {
+        if (
+            ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)
+        ) {
+            e.preventDefault();
+        }
+    });
     prevFrameBtn.addEventListener("click", onPrevBtnClick);
 
     nextFrameBtn.addEventListener("click", onNextBtnClick);
@@ -109,4 +114,8 @@ function setSeekerMaximum(value) {
     seekerSlider.max = String(value); 
 }
 
-export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume };
+function setSeekerWidth(value) {
+    seekerSlider.style.width = `${value}px`; 
+}
+
+export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume, setSeekerWidth };

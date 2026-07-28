@@ -11,6 +11,13 @@ function getFrameStrokes(frame) {
     return frameStrokes.get(frame) ?? [];
 }
 
+function getMarkedFrames() {
+    return Array.from(frameStrokes.keys());
+}
+
+function clearStrokes() {
+    frameStrokes.clear();
+}
 
 /**
  * 
@@ -51,4 +58,4 @@ function importStrokes(data) {
     }
 }
 
-export default {getFrameStrokes, removeLastStroke, addFrameStroke, exportStrokes, importStrokes};
+export default {getFrameStrokes, removeLastStroke, addFrameStroke, exportStrokes, importStrokes, getMarkedFrames, clearStrokes};

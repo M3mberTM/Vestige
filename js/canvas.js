@@ -17,6 +17,9 @@ let canvasHeight = 0;
 const LINE_WIDTH = 3;
 const LINE_CAP = "round";
 
+/** * @type {(() => void) | null} */
+let onDrawingsChangedCallback = null;
+
 /**
  * Sets up the website canvas properly and adds event listeners
  */
@@ -41,6 +44,18 @@ function init() {
  */
 function pointToPixels(point) {
     return [point[0] * canvasWidth, point[1] * canvasHeight];
+}
+
+/**
+ * 
+ * @param {() => void} callback 
+ */
+function setOnDrawingsChanged(callback) {
+    onDrawingsChangedCallback = callback;
+}
+
+function onDrawingsChanged() {
+    onDrawingsChangedCallback?.();
 }
 
 /**
@@ -160,6 +175,7 @@ function endDraw() {
     }
     currentStroke = null;
     ctx.closePath();
+    onDrawingsChanged();
 }
 
 /**
@@ -200,4 +216,4 @@ function setCanvasSize(size) {
     applyCanvasStyle();
 }
 
-export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke};
+export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke, setOnDrawingsChanged};

@@ -1,5 +1,6 @@
 import video from "./video.js";
 import project from "./project.js";
+import { FILE_EXTENSION } from "./constants.js";
 
 /** @type {HTMLInputElement} */
 let fileInput;
@@ -32,7 +33,7 @@ function onFileInput() {
     };
     const file = fileInput.files[0];
     if (!file) return;
-    if (file.name.endsWith(".vsie")) {
+    if (file.name.endsWith(FILE_EXTENSION)) {
         project.loadProject(file).catch((err) => console.error(err));
     } else {
         video.loadVideo(file);

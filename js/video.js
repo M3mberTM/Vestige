@@ -74,13 +74,14 @@ function loadVideo(file) {
         videoFps = fps;
     };
 
+    // precalculate frame times and then refer to them when switching frames
     mp4boxFile.onSamples = (id, user, samples) => {
-        frameTimes.push(0);
+        frameTimes.push(0); // samples does not contain the first frame
         for (const sample of samples) {
             frameTimes.push(sample.cts / videoTimescale);
         }
         frameTimes.sort((a, b) => a - b);
-        frameTimes[frameTimes.length-1] = video.duration;
+        frameTimes[frameTimes.length-1] = video.duration; // last frame can sometimes be different than video duration
         frameCount = frameTimes.length;
         isMp4BoxLoaded = true;
         finishLoadingIfReady();
