@@ -1,8 +1,29 @@
 /**
  * Represents one continuous stroke in canvas
  * @typedef {object} Stroke
- * @property {string} color
+ * @property {"stroke"} type
+ * @property {HexColor} color
  * @property {Point[]} points
+ */
+
+/**
+ * Represents one text in canvas
+ * @typedef {object} TextDrawing
+ * @property {"text"} type
+ * @property {HexColor} color
+ * @property {string} text
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
+ * Represents a clear operation
+ * @typedef {object} ClearDrawing
+ * @property {"clear"} type
+ */
+
+/**
+ * @typedef {Stroke | TextDrawing | ClearDrawing} Drawing
  */
 
 /**

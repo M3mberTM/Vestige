@@ -4,6 +4,12 @@ import canvas from "./canvas.js";
 let colorInput;
 /** @type {HTMLButtonElement} */
 let clearBtn;
+/** @type {HTMLButtonElement} */
+let deleteBtn;
+/** @type {HTMLButtonElement} */
+let brushBtn;
+/** @type {HTMLButtonElement} */
+let textBtn;
 /** @type {HTMLDivElement} */
 let colorBtn;
 /** @type {HTMLDivElement} */
@@ -18,6 +24,12 @@ function init() {
     colorBtn = document.getElementById("colorBtn");
     // @ts-ignore
     colorPreview = document.getElementById("colorPreview");
+    // @ts-ignore
+    deleteBtn = document.getElementById("deleteCanvasBtn");
+    // @ts-ignore
+    brushBtn = document.getElementById("brushBtn");
+    // @ts-ignore
+    textBtn = document.getElementById("textBtn");
 
     colorInput.addEventListener("input", onColorInputChange);
     clearBtn.addEventListener("click", onClearBtnClick);

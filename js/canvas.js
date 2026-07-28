@@ -1,4 +1,4 @@
-import drawings from "./drawings";
+import annotations from "./annotations";
 import video from "./video";
 /** @import {Stroke, ElementSize, HexColor, Point} from "./types" */
 
@@ -75,12 +75,11 @@ function applyCanvasStyle() {
 }
 
 /**
- * Removes the last stroke from the canvas
+ * Removes the last drawing from the canvas
  */
 function undoStroke() {
-
     const currentFrame = video.getCurrentFrame();
-    drawings.removeLastStroke(currentFrame);
+    annotations.removeLastAnnotation(currentFrame);
     redrawFrameCanvas(currentFrame);
 }
 
@@ -90,9 +89,21 @@ function undoStroke() {
  */
 export function redrawFrameCanvas(frame) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const strokes = drawings.getFrameStrokes(frame);
-    for (const stroke of strokes) {
-        drawStroke(stroke);
+    const drawings = annotations.getFrameAnnotations(frame);
+    for (const drawing of drawings) {
+        switch (drawing.type) {
+            case "stroke":
+                drawStroke(drawing); 
+                break;
+            case "clear":
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                break;
+            case "text":
+                console.log("text") // TODO implement function for redrawing text
+                break;
+            default:
+                break;
+        }
     }
 
     ctx.beginPath();
@@ -140,6 +151,7 @@ function startDraw(e) {
     if (!canDraw) return;
     drawing = true;
     currentStroke = {
+        type: "stroke",
         color: color,
         points: [],
     };
@@ -171,7 +183,7 @@ function endDraw() {
     drawing = false;
     if (currentStroke) {
         const currentFrame = video.getCurrentFrame();
-        drawings.addFrameStroke(currentFrame, currentStroke);
+        annotations.addFrameAnnotation(currentFrame, currentStroke);
     }
     currentStroke = null;
     ctx.closePath();
@@ -184,7 +196,7 @@ function endDraw() {
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const currentFrame = video.getCurrentFrame();
-    drawings.addFrameStroke(currentFrame, { color: color, points: []});
+    annotations.addFrameAnnotation(currentFrame, { type: "clear"});
 }
 
 /**

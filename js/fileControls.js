@@ -17,6 +17,13 @@ function init() {
     // @ts-ignore
     exportBtn = document.getElementById("exportBtn");
 
+    fileInputBtn.addEventListener("keydown", (e) => {
+        if (
+            ["Space"].includes(e.code)
+        ) {
+            e.preventDefault();
+        }
+    });
     fileInput.addEventListener("change", onFileInput);
     fileInputBtn.addEventListener("click", onFileInputBtnClick);
     exportBtn.addEventListener("click", onExportBtnClick);

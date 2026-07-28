@@ -36,6 +36,16 @@ function init() {
             e.preventDefault();
         }
     });
+    const preventButtons = [playPauseBtn, prevFrameBtn, nextFrameBtn];
+    for (const button of preventButtons) {
+        button.addEventListener("keydown", (e) => {
+            if (
+                ["Space"].includes(e.code)
+            ) {
+                e.preventDefault();
+            }
+        });
+    }
     prevFrameBtn.addEventListener("click", onPrevBtnClick);
 
     nextFrameBtn.addEventListener("click", onNextBtnClick);
@@ -114,8 +124,4 @@ function setSeekerMaximum(value) {
     seekerSlider.max = String(value); 
 }
 
-function setSeekerWidth(value) {
-    seekerSlider.style.width = `${value}px`; 
-}
-
-export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume, setSeekerWidth };
+export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume };

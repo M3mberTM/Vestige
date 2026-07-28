@@ -1,5 +1,5 @@
 import video from "./video.js";
-import drawings from "./drawings.js";
+import annotations from "./annotations.js";
 import JSZip from "jszip";
 import { FILE_EXTENSION } from "./constants.js";
 
@@ -8,7 +8,7 @@ async function saveProject() {
     const zip = new JSZip();
 
     zip.file("video.mp4", video.getVideoFile());
-    zip.file("drawings.json", JSON.stringify(drawings.exportStrokes()));
+    zip.file("annotations.json", JSON.stringify(annotations.exportAnnotations()));
 
     const blob = await zip.generateAsync({ type: "blob" });
     const url = URL.createObjectURL(blob);
@@ -39,9 +39,9 @@ async function loadProject(file) {
     const zip = await JSZip.loadAsync(file);
 
     const videoBlob = await zip.file("video.mp4")?.async("blob");
-    const drawingsJson = await zip.file("drawings.json")?.async("string");
+    const annotationsJson = await zip.file("annotations.json")?.async("string");
 
-    if (!videoBlob || !drawingsJson) {
+    if (!videoBlob || !annotationsJson) {
         alert("Invalid project file");
         return;
     };
@@ -51,7 +51,7 @@ async function loadProject(file) {
         { type: "video/mp4" }
     );
 
-    drawings.importStrokes(JSON.parse(drawingsJson));
+    annotations.importAnnotations(JSON.parse(annotationsJson));
 
     video.loadVideo(videoFile);
 }

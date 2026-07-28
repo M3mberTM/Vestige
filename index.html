@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Frame by frame drawing</title>
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=brush" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=title" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0&icon_names=brush,delete,title" />
 </head>
 <link rel="stylesheet" href="css/styles.css">
 
@@ -22,15 +20,20 @@
             </div>
             <div class="options" id="canvasOptions">
                 <div class="subOptions">
+                    <button class="iconButton secondary" id="deleteCanvasBtn">
+                        <span class="material-symbols-outlined">
+                            delete
+                        </span>
+                    </button>
                     <button id="clearCanvasBtn" class="button secondary">Clear canvas</button>
                 </div>
                 <div class="subOptions">
-                    <button class="iconButton secondary">
+                    <button class="iconButton secondary" id="brushBtn">
                         <span class="material-symbols-outlined">
                             brush
                         </span>
                     </button>
-                    <button class="iconButton secondary">
+                    <button class="iconButton secondary" id="textBtn">
                         <span class="material-symbols-outlined">
                             title
                         </span>

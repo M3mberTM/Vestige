@@ -5,7 +5,7 @@ import playbackControls from "./playbackControls.js";
 import canvasControls from "./canvasControls.js";
 import fileControls from "./fileControls.js";
 import markers from "./markers.js";
-import drawings from "./drawings.js";
+import annotations from "./annotations.js";
 
 
 init();
@@ -39,7 +39,7 @@ function onKeyDown(event) {
 }
 
 function onDrawingsChanged() {
-    markers.redraw(drawings.getMarkedFrames(), video.getFrameCount());
+    markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
 }
 
 function toggleVideoPlayback() {
@@ -58,12 +58,12 @@ function onVideoLoadingStarted() {
 
 function onVideoLoad() {
     canvas.setCanvasSize(video.getVideoSize());
-    drawings.clearStrokes();
+    annotations.clearAnnotations();
     canvas.setCanDraw(true);
     playbackControls.setSeekerValue(0);
     playbackControls.setSeekerMaximum(video.getFrameCount() - 1);
     markers.setCanvasSize(video.getVideoSize());
-    markers.redraw(drawings.getMarkedFrames(), video.getFrameCount());
+    markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
 }
 
 /**
