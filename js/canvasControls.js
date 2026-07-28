@@ -34,7 +34,12 @@ function init() {
     colorInput.addEventListener("input", onColorInputChange);
     clearBtn.addEventListener("click", onClearBtnClick);
     colorBtn.addEventListener("click", onColorBtnClick);
+    deleteBtn.addEventListener("click", onDeleteBtnClick);
 
+}
+
+function onDeleteBtnClick() {
+    canvas.deleteCanvas();
 }
 
 function onColorBtnClick() {

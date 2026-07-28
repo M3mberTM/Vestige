@@ -83,6 +83,12 @@ function undoStroke() {
     redrawFrameCanvas(currentFrame);
 }
 
+function deleteCanvas() {
+    const currentFrame = video.getCurrentFrame();
+    annotations.removeFrameAnnotations(currentFrame);
+    redrawFrameCanvas(currentFrame);
+}
+
 /**
  * Draws all the drawings a user did on a specific frame
  * @param {number} frame 
@@ -105,7 +111,7 @@ export function redrawFrameCanvas(frame) {
                 break;
         }
     }
-
+    onDrawingsChanged();
     ctx.beginPath();
 }
 
@@ -228,4 +234,5 @@ function setCanvasSize(size) {
     applyCanvasStyle();
 }
 
-export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke, setOnDrawingsChanged};
+export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke,
+    setOnDrawingsChanged, deleteCanvas};

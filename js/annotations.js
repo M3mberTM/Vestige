@@ -20,6 +20,14 @@ function clearAnnotations() {
 }
 
 /**
+ * Removes all the annotations on a specific frame
+ * @param {number} frame 
+ */
+function removeFrameAnnotations(frame) {
+    annotations.delete(frame);
+}
+
+/**
  * 
  * @param {number} frame 
  */
@@ -58,4 +66,5 @@ function importAnnotations(data) {
     }
 }
 
-export default {getFrameAnnotations, removeLastAnnotation, addFrameAnnotation, exportAnnotations, importAnnotations, getMarkedFrames, clearAnnotations};
+export default {getFrameAnnotations, removeLastAnnotation, addFrameAnnotation, exportAnnotations,
+    importAnnotations, getMarkedFrames, clearAnnotations, removeFrameAnnotations};
