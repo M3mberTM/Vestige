@@ -16,29 +16,36 @@
             <div class="options" id="fileOptions">
                 <input type="file" id="videoInput" accept="video/*,.vsie">
                 <button class="button" id="videoInputBtn">Choose File</button>
-                <button class="button" id="exportBtn">Export As...</button>
+                <div class="dropdown" id="dropdown">
+                    <button class="button" id="exportBtn">Export As...</button>
+
+                    <div class="dropdownContent" id="dropdownContent">
+                        <button class="button dropdownItem" id="vsieBtn">.vsie</button>
+                        <button class="button dropdownItem" id="mp4Btn">.mp4</button>
+                    </div>
+                </div>
             </div>
             <div class="options" id="canvasOptions">
                 <div class="subOptions">
-                    <button class="iconButton secondary" id="deleteCanvasBtn">
+                    <button class="iconButton secondaryButton" id="deleteCanvasBtn">
                         <span class="material-symbols-outlined">
                             delete
                         </span>
                     </button>
-                    <button id="clearCanvasBtn" class="button secondary">Clear canvas</button>
+                    <button id="clearCanvasBtn" class="button secondaryButton">Clear canvas</button>
                 </div>
                 <div class="subOptions">
-                    <button class="iconButton secondary" id="brushBtn">
+                    <button class="iconButton secondaryButton" id="brushBtn">
                         <span class="material-symbols-outlined">
                             brush
                         </span>
                     </button>
-                    <button class="iconButton secondary" id="textBtn">
+                    <button class="iconButton secondaryButton" id="textBtn">
                         <span class="material-symbols-outlined">
                             title
                         </span>
                     </button>
-                    <div class="colorButton secondary" id="colorBtn">
+                    <div class="colorButton secondaryButton" id="colorBtn">
                         <div id="colorPreview"></div>
                         <input type="color" id="colorPicker" value="#000000" class="colorPicker">
                     </div>

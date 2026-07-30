@@ -8,6 +8,17 @@ let fileInput;
 let fileInputBtn;
 /** @type {HTMLButtonElement} */
 let exportBtn;
+/** @type {HTMLButtonElement} */
+let vsieBtn;
+/** @type {HTMLButtonElement} */
+let mp4Btn;
+/** @type {HTMLDivElement} */
+let fileDropdown;
+/** @type {HTMLDivElement} */
+let fileOptions;
+
+/** @type {number | null} */
+let dropdownTimeout = null;
 
 function init() {
     // @ts-ignore
@@ -16,17 +27,43 @@ function init() {
     fileInputBtn = document.getElementById("videoInputBtn");
     // @ts-ignore
     exportBtn = document.getElementById("exportBtn");
+    // @ts-ignore
+    vsieBtn = document.getElementById("vsieBtn");
+    // @ts-ignore
+    mp4Btn = document.getElementById("mp4Btn");
+    // @ts-ignore
+    fileDropdown = document.getElementById("dropdown");
+    // @ts-ignore
+    fileOptions = document.getElementById("dropdownContent");
 
-    fileInputBtn.addEventListener("keydown", (e) => {
-        if (
-            ["Space"].includes(e.code)
-        ) {
-            e.preventDefault();
-        }
-    });
+    const preventBtns = [vsieBtn, mp4Btn, exportBtn, fileInputBtn];
+    for (const button of preventBtns) {
+        button.addEventListener("keydown", (e) => {
+            if (["Space"].includes(e.code)) {
+                e.preventDefault();
+            }
+        });
+    }
     fileInput.addEventListener("change", onFileInput);
     fileInputBtn.addEventListener("click", onFileInputBtnClick);
-    exportBtn.addEventListener("click", onExportBtnClick);
+    vsieBtn.addEventListener("click", onVsieBtnClick);
+    mp4Btn.addEventListener("click", onMp4BtnClick);
+    fileDropdown.addEventListener("mouseenter", onDropdownEnter);
+    fileDropdown.addEventListener("mouseleave", onDropdownLeave);
+}
+
+function onDropdownEnter() {
+    fileOptions.classList.add("open");
+    if (dropdownTimeout) {
+        clearTimeout(dropdownTimeout);
+        dropdownTimeout = null;
+    }
+}
+
+function onDropdownLeave() {
+    dropdownTimeout = setTimeout(() => {
+        fileOptions.classList.remove("open");
+    }, 100);
 }
 
 function onFileInputBtnClick() {
@@ -47,10 +84,14 @@ function onFileInput() {
     }
 }
 
-function onExportBtnClick() {
+function onVsieBtnClick() {
     project.saveProject().then(() => {
         console.log("Project saved");
     }).catch((err) => console.error(err));
+}
+
+function onMp4BtnClick() {
+    console.log("burn in the video");
 }
 
 export default { init };

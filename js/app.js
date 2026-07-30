@@ -43,6 +43,7 @@ function onDrawingsChanged() {
 }
 
 function toggleVideoPlayback() {
+    if (!video.isVideoLoaded()) return;
     if (video.isVideoPlaying()) {
         video.pauseVideo();
         playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);

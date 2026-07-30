@@ -5,6 +5,7 @@ import { FILE_EXTENSION } from "./constants.js";
 
 
 async function saveProject() {
+    if (!video.isVideoLoaded()) return
     const zip = new JSZip();
 
     zip.file("video.mp4", video.getVideoFile());
