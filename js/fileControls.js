@@ -1,6 +1,7 @@
 import video from "./video.js";
 import project from "./project.js";
 import { FILE_EXTENSION } from "./constants.js";
+import burning from "./burning.js";
 
 /** @type {HTMLInputElement} */
 let fileInput;
@@ -92,6 +93,9 @@ function onVsieBtnClick() {
 
 function onMp4BtnClick() {
     console.log("burn in the video");
+    burning.burnVideo().then(() => {
+        console.log("burned");
+    }).catch((err) => console.error(err));
 }
 
 export default { init };

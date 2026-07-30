@@ -12,6 +12,14 @@ let video;
 /** @type {File | null} */
 let loadedFile = null;
 
+/** * @type {MP4Box.ISOFile | null} */
+let mp4File = null;
+
+/** @type {MP4Box.Movie | null} */
+let videoInfo = null;
+/** @type {MP4Box.Sample[]} */
+let videoSamples = [];
+
 let isLoaded = false;
 let isMetadataLoaded = false;
 let isMp4BoxLoaded = false;
@@ -66,6 +74,7 @@ function loadVideo(file) {
     // all this just to get the framerate of the video
     const mp4boxFile = MP4Box.createFile();
     mp4boxFile.onReady = (info) => {
+        videoInfo = info
         const track = info.videoTracks[0];
         const fps = (track.nb_samples * track.timescale) / track.duration;
         videoTimescale = track.timescale
@@ -80,6 +89,7 @@ function loadVideo(file) {
         for (const sample of samples) {
             frameTimes.push(sample.cts / videoTimescale);
         }
+        videoSamples = [...samples];
         frameTimes.sort((a, b) => a - b);
         frameTimes[frameTimes.length-1] = video.duration; // last frame can sometimes be different than video duration
         frameCount = frameTimes.length;
@@ -313,6 +323,17 @@ function getVideoFile() {
     return loadedFile;
 }
 
+function getMp4Info() {
+    return videoInfo;
+}
+
+function getVideoSamples() {
+    return videoSamples;
+}
+
+function getMp4File() {
+    return mp4File;
+}
 
 export default {
     loadVideo,
@@ -334,5 +355,8 @@ export default {
     setOnFrameChanged,
     getFrameCount,
     setOnLoadStarted,
-    getVideoFile
+    getVideoFile,
+    getMp4Info,
+    getVideoSamples,
+    getMp4File
 };
