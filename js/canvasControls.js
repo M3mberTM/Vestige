@@ -43,10 +43,14 @@ function init() {
 
 function onBrushBtnClick() {
     canvas.switchTool(TOOLS.BRUSH);
+    brushBtn.classList.add("active");
+    textBtn.classList.remove("active");
 }
 
 function onTextBtnClick() {
     canvas.switchTool(TOOLS.TEXT);
+    textBtn.classList.add("active");
+    brushBtn.classList.remove("active");
 }
 function onDeleteBtnClick() {
     canvas.deleteCanvas();

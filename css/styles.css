@@ -41,6 +41,10 @@ body {
     background-color: var(--tintedHighlight);
 }
 
+.button:active {
+    background-color: var(--tintedHighlight);
+}
+
 
 .content {
     display: flex;
@@ -178,6 +182,9 @@ body {
 }
 
 .secondaryButton:hover {
+    background-color: var(--tintedHighlight2);
+}
+.secondaryButton.active {
     background-color: var(--tintedHighlight2);
 }
 

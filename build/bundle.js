@@ -13053,9 +13053,13 @@
   }
   function onBrushBtnClick() {
     canvas_default.switchTool(TOOLS.BRUSH);
+    brushBtn.classList.add("active");
+    textBtn.classList.remove("active");
   }
   function onTextBtnClick() {
     canvas_default.switchTool(TOOLS.TEXT);
+    textBtn.classList.add("active");
+    brushBtn.classList.remove("active");
   }
   function onDeleteBtnClick() {
     canvas_default.deleteCanvas();
