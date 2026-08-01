@@ -238,3 +238,19 @@ body {
     display: none;
     position: absolute;
 }
+
+.volumeControls {
+    display: flex;
+    align-items: center;
+}
+
+.frameCounter {
+    display: flex;
+    align-items: center;
+    margin-top:5px;
+}
+
+#currentFrameTxt {
+    padding: 0;
+    margin: 0;
+}

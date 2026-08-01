@@ -62,6 +62,7 @@ function onVideoLoad() {
     annotations.clearAnnotations();
     canvas.setCanDraw(true);
     playbackControls.setSeekerValue(0);
+    playbackControls.setFrameCounterTxt(0);
     playbackControls.setSeekerMaximum(video.getFrameCount() - 1);
     markers.setCanvasSize(video.getVideoSize());
     markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
@@ -72,6 +73,7 @@ function onVideoLoad() {
  */
 function onFrameChange(frame) {
     playbackControls.setSeekerValue(frame);
+    playbackControls.setFrameCounterTxt(frame);
     canvas.redrawFrameCanvas(frame);
 }
 

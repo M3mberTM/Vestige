@@ -350,6 +350,7 @@ function switchTool(tool) {
     currentTool = tool;
     if (currentTool !== TOOLS.TEXT) {
         textToolInput.style.display = "none";
+        textToolInput.value = "";
     }
 }
 

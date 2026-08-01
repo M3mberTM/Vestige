@@ -16,6 +16,8 @@ let volumeSlider;
 let prevFrameBtn;
 /** @type {HTMLButtonElement} */
 let nextFrameBtn;
+/** @type {HTMLHeadingElement} */
+let frameCounterTxt;
 
 function init() {
     // @ts-ignore
@@ -28,6 +30,8 @@ function init() {
     prevFrameBtn = document.getElementById("prevFrame");
     // @ts-ignore
     nextFrameBtn = document.getElementById("nextFrame");
+    // @ts-ignore
+    frameCounterTxt = document.getElementById("currentFrameTxt");
 
     seekerSlider.addEventListener("keydown", (e) => {
         if (
@@ -110,6 +114,14 @@ function setSeekerValue(value) {
 
 /**
  * 
+ * @param {number} frameNum 
+ */
+function setFrameCounterTxt(frameNum) {
+    frameCounterTxt.textContent = String(frameNum);
+}
+
+/**
+ * 
  * @param {PlaybackButton} value 
  */
 function setPlayPauseBtnContent(value) {
@@ -124,4 +136,5 @@ function setSeekerMaximum(value) {
     seekerSlider.max = String(value); 
 }
 
-export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume };
+export default { init, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume,
+    decreaseVolume, setFrameCounterTxt };

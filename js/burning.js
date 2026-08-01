@@ -44,14 +44,14 @@ function getDecoderConfig() {
     if (codec.startsWith("avc1")) {
         return {
             codec: codec,
-            description: entry.av1C
+            description: entry.avcC
         }
     }
 
     if (codec.startsWith("hvc1")) {
         return {
             codec: codec,
-            description: entry.avcC
+            description: entry.hvcC
         }
     }
 

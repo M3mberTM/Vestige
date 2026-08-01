@@ -12909,6 +12909,7 @@
     currentTool = tool;
     if (currentTool !== TOOLS.TEXT) {
       textToolInput.style.display = "none";
+      textToolInput.value = "";
     }
   }
   var canvas_default = {
@@ -12933,12 +12934,14 @@
   var volumeSlider;
   var prevFrameBtn;
   var nextFrameBtn;
+  var frameCounterTxt;
   function init3() {
     playPauseBtn = document.getElementById("playPause");
     seekerSlider = document.getElementById("seeker");
     volumeSlider = document.getElementById("volumeSlider");
     prevFrameBtn = document.getElementById("prevFrame");
     nextFrameBtn = document.getElementById("nextFrame");
+    frameCounterTxt = document.getElementById("currentFrameTxt");
     seekerSlider.addEventListener("keydown", (e) => {
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
         e.preventDefault();
@@ -12996,13 +12999,24 @@
   function setSeekerValue(value) {
     seekerSlider.valueAsNumber = value;
   }
+  function setFrameCounterTxt(frameNum) {
+    frameCounterTxt.textContent = String(frameNum);
+  }
   function setPlayPauseBtnContent(value) {
     playPauseBtn.textContent = value;
   }
   function setSeekerMaximum(value) {
     seekerSlider.max = String(value);
   }
-  var playbackControls_default = { init: init3, setSeekerValue, setPlayPauseBtnContent, setSeekerMaximum, increaseVolume, decreaseVolume };
+  var playbackControls_default = {
+    init: init3,
+    setSeekerValue,
+    setPlayPauseBtnContent,
+    setSeekerMaximum,
+    increaseVolume,
+    decreaseVolume,
+    setFrameCounterTxt
+  };
 
   // js/canvasControls.js
   var colorInput;
@@ -13136,13 +13150,13 @@
     if (codec.startsWith("avc1")) {
       return {
         codec,
-        description: entry.av1C
+        description: entry.avcC
       };
     }
     if (codec.startsWith("hvc1")) {
       return {
         codec,
-        description: entry.avcC
+        description: entry.hvcC
       };
     }
     return null;
@@ -13315,12 +13329,14 @@
     annotations_default.clearAnnotations();
     canvas_default.setCanDraw(true);
     playbackControls_default.setSeekerValue(0);
+    playbackControls_default.setFrameCounterTxt(0);
     playbackControls_default.setSeekerMaximum(video_default.getFrameCount() - 1);
     markers_default.setCanvasSize(video_default.getVideoSize());
     markers_default.redraw(annotations_default.getMarkedFrames(), video_default.getFrameCount());
   }
   function onFrameChange(frame) {
     playbackControls_default.setSeekerValue(frame);
+    playbackControls_default.setFrameCounterTxt(frame);
     canvas_default.redrawFrameCanvas(frame);
   }
   function onVideoEnd() {
