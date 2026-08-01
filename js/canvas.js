@@ -1,18 +1,28 @@
 import annotations from "./annotations";
 import video from "./video";
-/** @import {Stroke, ElementSize, HexColor, Point} from "./types" */
+import { TOOLS } from "./types";
+/** @import {Stroke, ElementSize, HexColor, Point, DrawingTool, TextDrawing} from "./types" */
 
 /** @type {HTMLCanvasElement} */
 let canvas;
 /** @type {CanvasRenderingContext2D} */
 let ctx;
+/** @type {HTMLInputElement} */
+let textToolInput;
+
+
 let canDraw = false;
 let drawing = false;
 /** @type {Stroke | null} */
 let currentStroke = null;
+/** @type {TextDrawing | null} */
+let currentText = null;
 let color = "#000000";
 let canvasWidth = 0;
 let canvasHeight = 0;
+
+/** @type {DrawingTool} */
+let currentTool = TOOLS.BRUSH;
 
 const LINE_WIDTH = 3;
 const LINE_CAP = "round";
@@ -28,13 +38,17 @@ function init() {
     canvas = document.getElementById("canvas");
     // @ts-ignore
     ctx = canvas.getContext("2d");
+    // @ts-ignore
+    textToolInput = document.getElementById("textTool");
+
 
     applyCanvasStyle();
 
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mouseup", endDraw);
-    canvas.addEventListener("mouseout", endDraw);
-    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("mouseout", onMouseOut);
+    canvas.addEventListener("mousemove", onMouseMove);
+    textToolInput.addEventListener("keydown", onTextKeyDown);
 }
 
 /**
@@ -44,6 +58,80 @@ function init() {
  */
 function pointToPixels(point) {
     return [point[0] * canvasWidth, point[1] * canvasHeight];
+}
+
+/**
+ * 
+ * @param {KeyboardEvent} e 
+ */
+function onTextKeyDown(e) {
+    e.stopPropagation();
+    if (e.code === "Enter") {
+        if (!currentText) return;
+        const textDrawing = {...currentText, text: textToolInput.value};
+        type(textDrawing);
+        textToolInput.style.display = "none";
+        textToolInput.value = "";
+        currentText = null;
+    }
+
+}
+/**
+ * 
+ * @param {MouseEvent} e 
+ */
+function onMouseMove(e) {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+        draw(e);
+    }
+}
+function onMouseOut() {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+        endDraw();
+    }
+}
+
+function onMouseUp() {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+        endDraw();
+    }
+}
+/**
+ * 
+ * @param {MouseEvent} e 
+ */
+function onMouseDown(e) {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+        startDraw(e);
+    }
+    if (currentTool === TOOLS.TEXT) {
+        createTextBox(e);
+    }
+}
+
+/**
+ * 
+ * @param {MouseEvent} e 
+ */
+function createTextBox(e) {
+    const [x,y] = getCanvasPosition(e);
+    textToolInput.style.left = `${x}px`;
+    textToolInput.style.top = `${y}px`;
+    textToolInput.style.display = "block";
+    requestAnimationFrame(() => textToolInput.focus());
+    // textToolInput.focus();
+    console.log(document.activeElement);
+    currentText = {
+        type: "text",
+        text: "",
+        color: color,
+        x,
+        y
+    }
 }
 
 /**
@@ -105,7 +193,7 @@ export function redrawFrameCanvas(frame) {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 break;
             case "text":
-                console.log("text") // TODO implement function for redrawing text
+                drawText(drawing);
                 break;
             default:
                 break;
@@ -154,7 +242,6 @@ function getCanvasPosition(e) {
  * @param {MouseEvent} e 
  */
 function startDraw(e) {
-    if (!canDraw) return;
     drawing = true;
     currentStroke = {
         type: "stroke",
@@ -172,7 +259,7 @@ function startDraw(e) {
  * @param {MouseEvent} e 
  */
 function draw(e) {
-    if (!canDraw || !drawing) return;
+    if (!drawing) return;
 
     const [x,y] = getCanvasPosition(e)
 
@@ -234,5 +321,37 @@ function setCanvasSize(size) {
     applyCanvasStyle();
 }
 
+/**
+ * 
+ * @param {TextDrawing} textDrawing 
+ */
+function type(textDrawing) {
+    drawText(textDrawing);
+    const currentFrame = video.getCurrentFrame();
+    annotations.addFrameAnnotation(currentFrame, textDrawing);
+    onDrawingsChanged();
+
+}
+/**
+ * 
+ * @param {TextDrawing} textDrawing 
+ */
+function drawText(textDrawing) {
+    ctx.font = "17px Arial";
+    ctx.fillStyle = textDrawing.color;
+    ctx.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
+}
+
+/**
+ * 
+ * @param {DrawingTool} tool 
+ */
+function switchTool(tool) {
+    currentTool = tool;
+    if (currentTool !== TOOLS.TEXT) {
+        textToolInput.style.display = "none";
+    }
+}
+
 export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke,
-    setOnDrawingsChanged, deleteCanvas};
+    setOnDrawingsChanged, deleteCanvas, drawText, switchTool};

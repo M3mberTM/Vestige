@@ -233,3 +233,8 @@ body {
 .dropdownContent.open {
     display: flex;
 }
+
+#textTool {
+    display: none;
+    position: absolute;
+}

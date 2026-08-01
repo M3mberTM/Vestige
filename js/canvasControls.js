@@ -1,4 +1,5 @@
 import canvas from "./canvas.js";
+import { TOOLS } from "./types.js";
 
 /** @type {HTMLInputElement} */
 let colorInput;
@@ -33,11 +34,20 @@ function init() {
 
     colorInput.addEventListener("input", onColorInputChange);
     clearBtn.addEventListener("click", onClearBtnClick);
+    textBtn.addEventListener("click", onTextBtnClick);
+    brushBtn.addEventListener("click", onBrushBtnClick);
     colorBtn.addEventListener("click", onColorBtnClick);
     deleteBtn.addEventListener("click", onDeleteBtnClick);
 
 }
 
+function onBrushBtnClick() {
+    canvas.switchTool(TOOLS.BRUSH);
+}
+
+function onTextBtnClick() {
+    canvas.switchTool(TOOLS.TEXT);
+}
 function onDeleteBtnClick() {
     canvas.deleteCanvas();
 }

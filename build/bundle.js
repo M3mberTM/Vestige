@@ -2404,6 +2404,7 @@
 
   // js/types.js
   var PLAYBACK_BUTTON = Object.freeze({ PLAY: "Play", PAUSE: "Pause" });
+  var TOOLS = Object.freeze({ BRUSH: "brush", TEXT: "text" });
 
   // js/annotations.js
   var annotations = /* @__PURE__ */ new Map();
@@ -2615,8 +2616,8 @@
     isEof() {
       return this.position >= this._byteLength;
     }
-    #isTupleType(type) {
-      return Array.isArray(type) && type.length === 3 && type[0] === "[]";
+    #isTupleType(type2) {
+      return Array.isArray(type2) && type2.length === 3 && type2[0] === "[]";
     }
     /**
     * Maps a Uint8Array into the DataStream buffer.
@@ -3273,15 +3274,15 @@
     * @param struct Struct to pass to write callback functions.
     * @bundle DataStream-write.js
     */
-    writeType(type, value, struct) {
-      if (typeof type === "function") return type(this, value);
-      else if (typeof type === "object" && !(type instanceof Array)) return type.set(this, value, struct);
+    writeType(type2, value, struct) {
+      if (typeof type2 === "function") return type2(this, value);
+      else if (typeof type2 === "object" && !(type2 instanceof Array)) return type2.set(this, value, struct);
       let lengthOverride;
       let charset = "ASCII";
       const pos = this.position;
-      let parsedType = type;
-      if (typeof type === "string" && /:/.test(type)) {
-        const tp = type.split(":");
+      let parsedType = type2;
+      if (typeof type2 === "string" && /:/.test(type2)) {
+        const tp = type2.split(":");
         parsedType = tp[0];
         lengthOverride = parseInt(tp[1]);
       }
@@ -3517,15 +3518,15 @@
     * @return  Returns the object on successful read, null on unsuccessful.
     * @bundle DataStream-read-struct.js
     */
-    readType(type, struct) {
-      if (typeof type === "function") return type(this, struct);
-      if (typeof type === "object" && !(type instanceof Array)) return type.get(this, struct);
-      if (type instanceof Array && type.length !== 3) return this.readStruct(type);
+    readType(type2, struct) {
+      if (typeof type2 === "function") return type2(this, struct);
+      if (typeof type2 === "object" && !(type2 instanceof Array)) return type2.get(this, struct);
+      if (type2 instanceof Array && type2.length !== 3) return this.readStruct(type2);
       let value;
       let lengthOverride;
       let charset = "ASCII";
       const pos = this.position;
-      let parsedType = type;
+      let parsedType = type2;
       if (typeof parsedType === "string" && /:/.test(parsedType)) {
         const tp = parsedType.split(":");
         parsedType = tp[0];
@@ -3667,12 +3668,12 @@
               while (true) {
                 const pos2 = this.position;
                 try {
-                  const type2 = this.readType(ta, struct);
-                  if (!type2) {
+                  const type3 = this.readType(ta, struct);
+                  if (!type3) {
                     this.position = pos2;
                     break;
                   }
-                  value.push(type2);
+                  value.push(type3);
                 } catch {
                   this.position = pos2;
                   break;
@@ -3681,9 +3682,9 @@
             } else {
               value = new Array(length);
               for (let i = 0; i < length; i++) {
-                const type2 = this.readType(ta, struct);
-                if (!type2) return;
-                value[i] = type2;
+                const type3 = this.readType(ta, struct);
+                if (!type3) return;
+                value[i] = type3;
               }
             }
             break;
@@ -4569,19 +4570,19 @@
       return { code: 0 };
     }
     let size = stream.readUint32();
-    const type = stream.readString(4);
-    if (type.length !== 4 || !/^[\x20-\x7E]{4}$/.test(type)) {
-      Log.error("BoxParser", `Invalid box type: '${type}'`);
+    const type2 = stream.readString(4);
+    if (type2.length !== 4 || !/^[\x20-\x7E]{4}$/.test(type2)) {
+      Log.error("BoxParser", `Invalid box type: '${type2}'`);
       return {
         code: -1,
         start: start2,
-        type
+        type: type2
       };
     }
-    let box_type = type;
-    Log.debug("BoxParser", "Found box of type '" + type + "' and size " + size + " at position " + start2);
+    let box_type = type2;
+    Log.debug("BoxParser", "Found box of type '" + type2 + "' and size " + size + " at position " + start2);
     hdr_size = 8;
-    if (type === "uuid") {
+    if (type2 === "uuid") {
       if (stream.getEndPosition() - stream.getPosition() < 16 || parentSize - hdr_size < 16) {
         stream.seek(start2);
         Log.debug("BoxParser", "Not enough bytes left in the parent box to parse a UUID box");
@@ -4594,17 +4595,17 @@
     if (size === 1) {
       if (stream.getEndPosition() - stream.getPosition() < 8 || parentSize && parentSize - hdr_size < 8) {
         stream.seek(start2);
-        Log.warn("BoxParser", 'Not enough data in stream to parse the extended size of the "' + type + '" box');
+        Log.warn("BoxParser", 'Not enough data in stream to parse the extended size of the "' + type2 + '" box');
         return { code: 0 };
       }
       originalSize = size;
       size = stream.readUint64();
       hdr_size += 8;
     } else if (size === 0) if (parentSize) size = parentSize;
-    else if (type !== "mdat") {
-      Log.error("BoxParser", "Unlimited box size not supported for type: '" + type + "'");
+    else if (type2 !== "mdat") {
+      Log.error("BoxParser", "Unlimited box size not supported for type: '" + type2 + "'");
       box = new Box(size);
-      box.type = type;
+      box.type = type2;
       return {
         code: 1,
         box,
@@ -4612,20 +4613,20 @@
       };
     } else size = stream.getEndPosition() - start2;
     if (size !== 0 && size < hdr_size) {
-      Log.error("BoxParser", "Box of type " + type + " has an invalid size " + size + " (too small to be a box)");
+      Log.error("BoxParser", "Box of type " + type2 + " has an invalid size " + size + " (too small to be a box)");
       return {
         code: 0,
-        type,
+        type: type2,
         size,
         hdr_size,
         start: start2
       };
     }
     if (size !== 0 && parentSize && size > parentSize) {
-      Log.error("BoxParser", "Box of type '" + type + "' has a size " + size + " greater than its container size " + parentSize);
+      Log.error("BoxParser", "Box of type '" + type2 + "' has a size " + size + " greater than its container size " + parentSize);
       return {
         code: 0,
-        type,
+        type: type2,
         size,
         hdr_size,
         start: start2
@@ -4633,10 +4634,10 @@
     }
     if (size !== 0 && start2 + size > stream.getEndPosition()) {
       stream.seek(start2);
-      Log.info("BoxParser", "Not enough data in stream to parse the entire '" + type + "' box");
+      Log.info("BoxParser", "Not enough data in stream to parse the entire '" + type2 + "' box");
       return {
         code: 0,
-        type,
+        type: type2,
         size,
         hdr_size,
         start: start2,
@@ -4645,22 +4646,22 @@
     }
     if (headerOnly) return {
       code: 1,
-      type,
+      type: type2,
       size,
       hdr_size,
       start: start2
     };
-    else if (type in BoxRegistry.box) box = new BoxRegistry.box[type](size);
-    else if (type !== "uuid") {
-      Log.warn("BoxParser", `Unknown box type: '${type}'`);
+    else if (type2 in BoxRegistry.box) box = new BoxRegistry.box[type2](size);
+    else if (type2 !== "uuid") {
+      Log.warn("BoxParser", `Unknown box type: '${type2}'`);
       box = new Box(size);
-      box.type = type;
+      box.type = type2;
       box.has_unparsed_data = true;
     } else if (uuid in BoxRegistry.uuid) box = new BoxRegistry.uuid[uuid](size);
     else {
       Log.warn("BoxParser", `Unknown UUID box type: '${uuid}'`);
       box = new Box(size);
-      box.type = type;
+      box.type = type2;
       box.uuid = uuid;
       box.has_unparsed_data = true;
     }
@@ -7107,12 +7108,12 @@
       this.references = [];
       const count = stream.readUint16();
       for (let i = 0; i < count; i++) {
-        const type = stream.readUint32();
+        const type2 = stream.readUint32();
         const subsegment_duration = stream.readUint32();
         const sap = stream.readUint32();
         this.references.push({
-          reference_type: type >> 31 & 1,
-          referenced_size: type & 2147483647,
+          reference_type: type2 >> 31 & 1,
+          referenced_size: type2 & 2147483647,
           subsegment_duration,
           starts_with_SAP: sap >> 31 & 1,
           SAP_type: sap >> 28 & 7,
@@ -8115,14 +8116,14 @@
         }
       }
     }
-    getBox(type) {
-      const result = this.getBoxes(type, true);
+    getBox(type2) {
+      const result = this.getBoxes(type2, true);
       return result.length ? result[0] : void 0;
     }
-    getBoxes(type, returnEarly) {
+    getBoxes(type2, returnEarly) {
       const result = [];
       const sweep = (root) => {
-        if (root instanceof Box && root.type && root.type === type) result.push(root);
+        if (root instanceof Box && root.type && root.type === type2) result.push(root);
         const inner = [];
         if (root["boxes"]) inner.push(...root.boxes);
         if (root["entries"]) inner.push(...root["entries"]);
@@ -10135,13 +10136,13 @@
       let flagAndType;
       do {
         flagAndType = stream.readUint8();
-        const type = Math.min(flagAndType & BLOCKTYPE_MASK, knownBlockTypes.length - 1);
-        if (!type) {
+        const type2 = Math.min(flagAndType & BLOCKTYPE_MASK, knownBlockTypes.length - 1);
+        if (!type2) {
           stream.readUint8Array(13);
           this.samplerate = stream.readUint32() >> 12;
           stream.readUint8Array(20);
         } else stream.readUint8Array(stream.readUint24());
-        boxesFound.push(knownBlockTypes[type]);
+        boxesFound.push(knownBlockTypes[type2]);
       } while (flagAndType & LASTMETADATABLOCKFLAG_MASK);
       this.numMetadataBlocks = boxesFound.length + " (" + boxesFound.join(", ") + ")";
     }
@@ -10959,21 +10960,21 @@
       this.height = stream.readUint32();
     }
   };
-  function parseItifData(type, data) {
-    if (type === dataBox.Types.UTF8) return new TextDecoder("utf-8").decode(data);
+  function parseItifData(type2, data) {
+    if (type2 === dataBox.Types.UTF8) return new TextDecoder("utf-8").decode(data);
     const view = new DataView(data.buffer);
-    if (type === dataBox.Types.BE_UNSIGNED_INT) if (data.length === 1) return view.getUint8(0);
+    if (type2 === dataBox.Types.BE_UNSIGNED_INT) if (data.length === 1) return view.getUint8(0);
     else if (data.length === 2) return view.getUint16(0, false);
     else if (data.length === 4) return view.getUint32(0, false);
     else if (data.length === 8) return view.getBigUint64(0, false);
     else throw new Error("Unsupported ITIF_TYPE_BE_UNSIGNED_INT length " + data.length);
-    else if (type === dataBox.Types.BE_SIGNED_INT) if (data.length === 1) return view.getInt8(0);
+    else if (type2 === dataBox.Types.BE_SIGNED_INT) if (data.length === 1) return view.getInt8(0);
     else if (data.length === 2) return view.getInt16(0, false);
     else if (data.length === 4) return view.getInt32(0, false);
     else if (data.length === 8) return view.getBigInt64(0, false);
     else throw new Error("Unsupported ITIF_TYPE_BE_SIGNED_INT length " + data.length);
-    else if (type === dataBox.Types.BE_FLOAT32) return view.getFloat32(0, false);
-    Log.warn("DataBox", "Unsupported or unimplemented itif data type: " + type);
+    else if (type2 === dataBox.Types.BE_FLOAT32) return view.getFloat32(0, false);
+    Log.warn("DataBox", "Unsupported or unimplemented itif data type: " + type2);
   }
   var dataBox = class extends Box {
     constructor(..._args) {
@@ -12466,6 +12467,7 @@
   var INVALID_VAL = -1;
   var video;
   var loadedFile = null;
+  var mp4File = null;
   var videoInfo = null;
   var videoSamples = [];
   var isLoaded = false;
@@ -12665,6 +12667,9 @@
   function getVideoSamples() {
     return videoSamples;
   }
+  function getMp4File() {
+    return mp4File;
+  }
   var video_default = {
     loadVideo,
     getCurrentFrame,
@@ -12687,32 +12692,91 @@
     setOnLoadStarted,
     getVideoFile,
     getMp4Info,
-    getVideoSamples
+    getVideoSamples,
+    getMp4File
   };
 
   // js/canvas.js
   var canvas;
   var ctx;
+  var textToolInput;
   var canDraw = false;
   var drawing = false;
   var currentStroke = null;
+  var currentText = null;
   var color = "#000000";
   var canvasWidth = 0;
   var canvasHeight = 0;
+  var currentTool = TOOLS.BRUSH;
   var LINE_WIDTH = 3;
   var LINE_CAP = "round";
   var onDrawingsChangedCallback = null;
   function init2() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
+    textToolInput = document.getElementById("textTool");
     applyCanvasStyle();
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mouseup", endDraw);
-    canvas.addEventListener("mouseout", endDraw);
-    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("mouseout", onMouseOut);
+    canvas.addEventListener("mousemove", onMouseMove);
+    textToolInput.addEventListener("keydown", onTextKeyDown);
   }
   function pointToPixels(point) {
     return [point[0] * canvasWidth, point[1] * canvasHeight];
+  }
+  function onTextKeyDown(e) {
+    e.stopPropagation();
+    if (e.code === "Enter") {
+      if (!currentText) return;
+      const textDrawing = { ...currentText, text: textToolInput.value };
+      type(textDrawing);
+      textToolInput.style.display = "none";
+      textToolInput.value = "";
+      currentText = null;
+    }
+  }
+  function onMouseMove(e) {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+      draw(e);
+    }
+  }
+  function onMouseOut() {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+      endDraw();
+    }
+  }
+  function onMouseUp() {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+      endDraw();
+    }
+  }
+  function onMouseDown(e) {
+    if (!canDraw) return;
+    if (currentTool === TOOLS.BRUSH) {
+      startDraw(e);
+    }
+    if (currentTool === TOOLS.TEXT) {
+      createTextBox(e);
+    }
+  }
+  function createTextBox(e) {
+    const [x, y] = getCanvasPosition(e);
+    textToolInput.style.left = `${x}px`;
+    textToolInput.style.top = `${y}px`;
+    textToolInput.style.display = "block";
+    requestAnimationFrame(() => textToolInput.focus());
+    console.log(document.activeElement);
+    currentText = {
+      type: "text",
+      text: "",
+      color,
+      x,
+      y
+    };
   }
   function setOnDrawingsChanged(callback) {
     onDrawingsChangedCallback = callback;
@@ -12750,7 +12814,7 @@
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           break;
         case "text":
-          console.log("text");
+          drawText(drawing2);
           break;
         default:
           break;
@@ -12780,7 +12844,6 @@
     return [e.clientX - rect.left, e.clientY - rect.top];
   }
   function startDraw(e) {
-    if (!canDraw) return;
     drawing = true;
     currentStroke = {
       type: "stroke",
@@ -12793,7 +12856,7 @@
     draw(e);
   }
   function draw(e) {
-    if (!canDraw || !drawing) return;
+    if (!drawing) return;
     const [x, y] = getCanvasPosition(e);
     if (!currentStroke) return;
     currentStroke.points.push(pixelsToPoint(x, y));
@@ -12831,6 +12894,23 @@
     canvasHeight = size.height;
     applyCanvasStyle();
   }
+  function type(textDrawing) {
+    drawText(textDrawing);
+    const currentFrame2 = video_default.getCurrentFrame();
+    annotations_default.addFrameAnnotation(currentFrame2, textDrawing);
+    onDrawingsChanged();
+  }
+  function drawText(textDrawing) {
+    ctx.font = "17px Arial";
+    ctx.fillStyle = textDrawing.color;
+    ctx.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
+  }
+  function switchTool(tool) {
+    currentTool = tool;
+    if (currentTool !== TOOLS.TEXT) {
+      textToolInput.style.display = "none";
+    }
+  }
   var canvas_default = {
     init: init2,
     clearCanvas,
@@ -12840,7 +12920,9 @@
     setCanvasSize,
     undoStroke,
     setOnDrawingsChanged,
-    deleteCanvas
+    deleteCanvas,
+    drawText,
+    switchTool
   };
 
   // js/playbackControls.js
@@ -12940,8 +13022,16 @@
     textBtn = document.getElementById("textBtn");
     colorInput.addEventListener("input", onColorInputChange);
     clearBtn.addEventListener("click", onClearBtnClick);
+    textBtn.addEventListener("click", onTextBtnClick);
+    brushBtn.addEventListener("click", onBrushBtnClick);
     colorBtn.addEventListener("click", onColorBtnClick);
     deleteBtn.addEventListener("click", onDeleteBtnClick);
+  }
+  function onBrushBtnClick() {
+    canvas_default.switchTool(TOOLS.BRUSH);
+  }
+  function onTextBtnClick() {
+    canvas_default.switchTool(TOOLS.TEXT);
   }
   function onDeleteBtnClick() {
     canvas_default.deleteCanvas();
@@ -13010,8 +13100,7 @@
   async function burnVideo() {
     if (!video_default.isVideoLoaded()) return;
     const file = video_default.getVideoFile();
-    const videoInfo2 = video_default.getMp4Info();
-    if (!file || !videoInfo2) {
+    if (!file) {
       console.log("Video file or info not loaded!");
       return;
     }
@@ -13024,13 +13113,39 @@
         console.error(err);
       }
     });
-    const videoTrack = videoInfo2.videoTracks[0];
-    decoder.configure({
-      codec: videoTrack.codec
-    });
+    const description = getDecoderConfig();
+    if (!description) {
+      console.log("Could not generate the decoder config");
+      return;
+    }
+    ;
+    decoder.configure(description);
     decodeChunks(decoder);
     await decoder.flush();
     decoder.close();
+  }
+  function getDecoderConfig() {
+    const mp4File2 = video_default.getMp4File();
+    const videoInfo2 = video_default.getMp4Info();
+    if (!videoInfo2 || !mp4File2) return;
+    const codec = videoInfo2.videoTracks[0].codec;
+    const entry = (
+      /** @type {Mp4Box.VisualSampleEntry} */
+      mp4File2.moov.trak.mdia.minf.stbl.stsd.entries[0]
+    );
+    if (codec.startsWith("avc1")) {
+      return {
+        codec,
+        description: entry.av1C
+      };
+    }
+    if (codec.startsWith("hvc1")) {
+      return {
+        codec,
+        description: entry.avcC
+      };
+    }
+    return null;
   }
   function decodeChunks(decoder) {
     const samples = video_default.getVideoSamples();

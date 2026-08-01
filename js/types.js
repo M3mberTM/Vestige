@@ -50,7 +50,12 @@
  */
 
 export const PLAYBACK_BUTTON = Object.freeze({PLAY: "Play", PAUSE: "Pause"});
+export const TOOLS = Object.freeze({BRUSH: "brush", TEXT: "text"});
 
 /**
  * @typedef {typeof PLAYBACK_BUTTON[keyof typeof PLAYBACK_BUTTON]} PlaybackButton
+ */
+
+/**
+ * @typedef {typeof TOOLS[keyof typeof TOOLS]} DrawingTool
  */
