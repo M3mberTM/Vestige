@@ -2436,8 +2436,8 @@
   }
   function importAnnotations(data) {
     annotations.clear();
-    for (const [frame, strokes] of Object.entries(data)) {
-      annotations.set(Number(frame), strokes);
+    for (const [frame, annotation] of Object.entries(data)) {
+      annotations.set(Number(frame), annotation);
     }
   }
   var annotations_default = {
@@ -12489,15 +12489,23 @@
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("ended", onEnded);
   }
-  function loadVideo(file) {
-    if (isLoaded) {
-      URL.revokeObjectURL(video.src);
-    }
+  function resetVars() {
     isLoaded = false;
     isMetadataLoaded = false;
     isMp4BoxLoaded = false;
     currentFrame = 0;
+    frameTimes.length = 0;
+    videoSamples.length = 0;
     lastNotifiedFrame = INVALID_VAL;
+    frameCount = INVALID_VAL;
+    videoFps = INVALID_VAL;
+    videoTimescale = INVALID_VAL;
+  }
+  function loadVideo(file) {
+    if (isLoaded) {
+      URL.revokeObjectURL(video.src);
+    }
+    resetVars();
     onLoadStartedCallback?.();
     const url = URL.createObjectURL(file);
     video.src = url;
@@ -12769,13 +12777,14 @@
     textToolInput.style.top = `${y}px`;
     textToolInput.style.display = "block";
     requestAnimationFrame(() => textToolInput.focus());
+    const [relativeX, relativeY] = pixelsToPoint(x, y);
     console.log(document.activeElement);
     currentText = {
       type: "text",
       text: "",
       color,
-      x,
-      y
+      x: relativeX,
+      y: relativeY
     };
   }
   function setOnDrawingsChanged(callback) {
@@ -12901,9 +12910,10 @@
     onDrawingsChanged();
   }
   function drawText(textDrawing) {
+    const [x, y] = pointToPixels([textDrawing.x, textDrawing.y]);
     ctx.font = "17px Arial";
     ctx.fillStyle = textDrawing.color;
-    ctx.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
+    ctx.fillText(textDrawing.text, x, y);
   }
   function switchTool(tool) {
     currentTool = tool;
@@ -13105,8 +13115,8 @@
       "video.mp4",
       { type: "video/mp4" }
     );
-    annotations_default.importAnnotations(JSON.parse(annotationsJson));
     video_default.loadVideo(videoFile);
+    annotations_default.importAnnotations(JSON.parse(annotationsJson));
   }
   var project_default = { saveProject, loadProject };
 
@@ -13323,10 +13333,10 @@
   }
   function onVideoLoadingStarted() {
     canvas_default.setCanDraw(false);
+    annotations_default.clearAnnotations();
   }
   function onVideoLoad() {
     canvas_default.setCanvasSize(video_default.getVideoSize());
-    annotations_default.clearAnnotations();
     canvas_default.setCanDraw(true);
     playbackControls_default.setSeekerValue(0);
     playbackControls_default.setFrameCounterTxt(0);

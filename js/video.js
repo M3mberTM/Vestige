@@ -52,6 +52,19 @@ function init() {
 }
 
 
+function resetVars() {
+    isLoaded = false;
+    isMetadataLoaded = false;
+    isMp4BoxLoaded = false;
+    currentFrame = 0;
+    frameTimes.length = 0;
+    videoSamples.length = 0;
+    lastNotifiedFrame = INVALID_VAL;
+    frameCount = INVALID_VAL;
+    videoFps = INVALID_VAL;
+    videoTimescale = INVALID_VAL;
+}
+
 /**
  * 
  * @param {File} file 
@@ -60,11 +73,7 @@ function loadVideo(file) {
     if (isLoaded) {
         URL.revokeObjectURL(video.src);
     }
-    isLoaded = false;
-    isMetadataLoaded = false;
-    isMp4BoxLoaded = false;
-    currentFrame = 0;
-    lastNotifiedFrame = INVALID_VAL;
+    resetVars()
     onLoadStartedCallback?.();
     const url = URL.createObjectURL(file);
     video.src = url;

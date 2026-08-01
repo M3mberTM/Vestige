@@ -124,13 +124,14 @@ function createTextBox(e) {
     textToolInput.style.display = "block";
     requestAnimationFrame(() => textToolInput.focus());
     // textToolInput.focus();
+    const [relativeX, relativeY] = pixelsToPoint(x, y);
     console.log(document.activeElement);
     currentText = {
         type: "text",
         text: "",
         color: color,
-        x,
-        y
+        x: relativeX,
+        y: relativeY
     }
 }
 
@@ -337,9 +338,10 @@ function type(textDrawing) {
  * @param {TextDrawing} textDrawing 
  */
 function drawText(textDrawing) {
+    const [x, y] = pointToPixels([textDrawing.x, textDrawing.y]);
     ctx.font = "17px Arial";
     ctx.fillStyle = textDrawing.color;
-    ctx.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
+    ctx.fillText(textDrawing.text, x, y);
 }
 
 /**

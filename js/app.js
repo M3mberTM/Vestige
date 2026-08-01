@@ -55,11 +55,11 @@ function toggleVideoPlayback() {
 
 function onVideoLoadingStarted() {
     canvas.setCanDraw(false);
+    annotations.clearAnnotations();
 }
 
 function onVideoLoad() {
     canvas.setCanvasSize(video.getVideoSize());
-    annotations.clearAnnotations();
     canvas.setCanDraw(true);
     playbackControls.setSeekerValue(0);
     playbackControls.setFrameCounterTxt(0);

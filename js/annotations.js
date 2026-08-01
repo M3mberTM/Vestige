@@ -61,8 +61,8 @@ function exportAnnotations() {
  */
 function importAnnotations(data) {
     annotations.clear();
-    for (const [frame, strokes] of Object.entries(data)) {
-        annotations.set(Number(frame), strokes);
+    for (const [frame, annotation] of Object.entries(data)) {
+        annotations.set(Number(frame), annotation);
     }
 }
 

@@ -52,9 +52,9 @@ async function loadProject(file) {
         { type: "video/mp4" }
     );
 
-    annotations.importAnnotations(JSON.parse(annotationsJson));
 
     video.loadVideo(videoFile);
+    annotations.importAnnotations(JSON.parse(annotationsJson));
 }
 
 export default {saveProject, loadProject};
