@@ -59,3 +59,7 @@ export const TOOLS = Object.freeze({BRUSH: "brush", TEXT: "text"});
 /**
  * @typedef {typeof TOOLS[keyof typeof TOOLS]} DrawingTool
  */
+
+/**
+ * @typedef {CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D} RenderContext
+ */

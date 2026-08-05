@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild js/app.js --bundle --outfile=build/bundle.js"
+    "build": "esbuild src/app.js --bundle --outfile=build/bundle.js"
   },
   "keywords": [],
   "author": "",

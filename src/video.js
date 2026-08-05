@@ -297,13 +297,24 @@ function adjustVideoSize() {
 }
 
 /**
- * @returns {ElementSize}
+ * @returns {ElementSize} size of the video component on screen
  */
 function getVideoSize() {
     return {
         width: video.clientWidth,
         height: video.clientHeight
     };
+}
+
+/**
+ * 
+ * @returns {ElementSize} original video resolution
+ */
+function getVideoResolution() {
+    return {
+        width: video.videoWidth,
+        height: video.videoHeight
+    }
 }
 
 /**
@@ -369,5 +380,6 @@ export default {
     getVideoFile,
     getMp4Info,
     getVideoSamples,
-    getMp4File
+    getMp4File,
+    getVideoResolution
 };

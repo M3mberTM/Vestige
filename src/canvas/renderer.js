@@ -1,12 +1,12 @@
 import geometry from "./geometry";
-/** @import {Stroke, TextDrawing, ElementSize, Drawing} from "../types" */
+/** @import {Stroke, TextDrawing, ElementSize, Drawing, RenderContext} from "../types" */
 
 const LINE_WIDTH = 3;
 const LINE_CAP = "round";
 
 /**
  * Draws all the drawings a user did on a specific frame
- * @param {CanvasRenderingContext2D} ctx
+ * @param {RenderContext} ctx
  * @param {Drawing[]} annotations 
  * @param {ElementSize} canvasSize
  */
@@ -31,7 +31,7 @@ function renderFrame(ctx, annotations, canvasSize) {
 
 /**
  * Clears out all the annotations from the canvas
- * @param {CanvasRenderingContext2D} ctx
+ * @param {RenderContext} ctx
  * @param {ElementSize} canvasSize
  */
 function clearCanvas(ctx, canvasSize) {
@@ -39,7 +39,7 @@ function clearCanvas(ctx, canvasSize) {
 }
 /**
  * Draws a singular stroke on the current canvas
- * @param {CanvasRenderingContext2D} ctx
+ * @param {RenderContext} ctx
  * @param {Stroke} stroke 
  * @param {ElementSize} canvasSize
  */
@@ -62,7 +62,7 @@ function drawStroke(ctx, stroke, canvasSize) {
 
 /**
  * Draws specific text on the canvas
- * @param {CanvasRenderingContext2D} ctx
+ * @param {RenderContext} ctx
  * @param {TextDrawing} textDrawing 
  * @param {ElementSize} canvasSize
  */
@@ -74,7 +74,7 @@ function drawText(ctx, textDrawing, canvasSize) {
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
+ * @param {RenderContext} ctx 
  */
 function applyCanvasStyle(ctx) {
     ctx.lineWidth = LINE_WIDTH;
