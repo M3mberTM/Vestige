@@ -1,4 +1,4 @@
-import canvas from "./canvas.js";
+import canvas from "./canvas/editor.js";
 import { TOOLS } from "./types.js";
 
 /** @type {HTMLInputElement} */

@@ -63,6 +63,7 @@ function resetVars() {
     frameCount = INVALID_VAL;
     videoFps = INVALID_VAL;
     videoTimescale = INVALID_VAL;
+    mp4File = null;
 }
 
 /**
@@ -90,6 +91,7 @@ function loadVideo(file) {
         mp4boxFile.setExtractionOptions(track.id, null, { nbSamples: Infinity});
         mp4boxFile.start();
         videoFps = fps;
+        mp4File = mp4boxFile;
     };
 
     // precalculate frame times and then refer to them when switching frames

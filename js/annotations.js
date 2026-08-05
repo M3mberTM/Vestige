@@ -1,5 +1,7 @@
 /** @import {Drawing } from "./types" */
 
+/** * @type {(() => void) | null} */
+let onAnnotationsChangedCallback = null;
 const annotations = new Map();
 
 /**
@@ -17,6 +19,7 @@ function getMarkedFrames() {
 
 function clearAnnotations() {
     annotations.clear();
+    onAnnotationsChanged();
 }
 
 /**
@@ -25,6 +28,7 @@ function clearAnnotations() {
  */
 function removeFrameAnnotations(frame) {
     annotations.delete(frame);
+    onAnnotationsChanged();
 }
 
 /**
@@ -34,6 +38,7 @@ function removeFrameAnnotations(frame) {
 function removeLastAnnotation(frame) {
     if (!annotations.has(frame)) return;
     annotations.get(frame).pop();
+    onAnnotationsChanged();
 }
 
 /**
@@ -46,6 +51,7 @@ function addFrameAnnotation(frame, annotation) {
         annotations.set(frame, []);
     };
     annotations.get(frame).push(annotation);
+    onAnnotationsChanged();
 }
 
 /**
@@ -66,5 +72,17 @@ function importAnnotations(data) {
     }
 }
 
+/**
+ * 
+ * @param {() => void} callback 
+ */
+function setOnAnnotationsChanged(callback) {
+    onAnnotationsChangedCallback = callback;
+}
+
+function onAnnotationsChanged() {
+    onAnnotationsChangedCallback?.();
+}
+
 export default {getFrameAnnotations, removeLastAnnotation, addFrameAnnotation, exportAnnotations,
-    importAnnotations, getMarkedFrames, clearAnnotations, removeFrameAnnotations};
+    importAnnotations, getMarkedFrames, clearAnnotations, removeFrameAnnotations, setOnAnnotationsChanged};

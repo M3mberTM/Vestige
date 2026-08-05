@@ -1,7 +1,9 @@
-import annotations from "./annotations";
-import video from "./video";
-import { TOOLS } from "./types";
-/** @import {Stroke, ElementSize, HexColor, Point, DrawingTool, TextDrawing} from "./types" */
+import annotations from "../annotations";
+import geometry from "./geometry";
+import rendering from "./renderer";
+import video from "../video";
+import { TOOLS } from "../types";
+/** @import {Stroke, ElementSize, HexColor, DrawingTool, TextDrawing} from "../types" */
 
 /** @type {HTMLCanvasElement} */
 let canvas;
@@ -24,12 +26,6 @@ let canvasHeight = 0;
 /** @type {DrawingTool} */
 let currentTool = TOOLS.BRUSH;
 
-const LINE_WIDTH = 3;
-const LINE_CAP = "round";
-
-/** * @type {(() => void) | null} */
-let onDrawingsChangedCallback = null;
-
 /**
  * Sets up the website canvas properly and adds event listeners
  */
@@ -41,8 +37,7 @@ function init() {
     // @ts-ignore
     textToolInput = document.getElementById("textTool");
 
-
-    applyCanvasStyle();
+    rendering.applyCanvasStyle(ctx);
 
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mouseup", onMouseUp);
@@ -51,14 +46,6 @@ function init() {
     textToolInput.addEventListener("keydown", onTextKeyDown);
 }
 
-/**
- * Converts point to pixels representing the x and y coordinates
- * @param {Point} point 
- * @returns {[number, number]} x, y relative to the canvas
- */
-function pointToPixels(point) {
-    return [point[0] * canvasWidth, point[1] * canvasHeight];
-}
 
 /**
  * 
@@ -74,7 +61,6 @@ function onTextKeyDown(e) {
         textToolInput.value = "";
         currentText = null;
     }
-
 }
 /**
  * 
@@ -114,17 +100,15 @@ function onMouseDown(e) {
 }
 
 /**
- * 
  * @param {MouseEvent} e 
  */
 function createTextBox(e) {
-    const [x,y] = getCanvasPosition(e);
+    const [x,y] = geometry.getCanvasPosition(e, canvas);
     textToolInput.style.left = `${x}px`;
     textToolInput.style.top = `${y}px`;
     textToolInput.style.display = "block";
     requestAnimationFrame(() => textToolInput.focus());
-    // textToolInput.focus();
-    const [relativeX, relativeY] = pixelsToPoint(x, y);
+    const [relativeX, relativeY] = geometry.pixelsToPoint(x, y, getCanvasSize());
     console.log(document.activeElement);
     currentText = {
         type: "text",
@@ -137,105 +121,54 @@ function createTextBox(e) {
 
 /**
  * 
- * @param {() => void} callback 
+ * @param {DrawingTool} tool 
  */
-function setOnDrawingsChanged(callback) {
-    onDrawingsChangedCallback = callback;
+function switchTool(tool) {
+    currentTool = tool;
+    if (currentTool !== TOOLS.TEXT) {
+        textToolInput.style.display = "none";
+        textToolInput.value = "";
+    }
 }
 
-function onDrawingsChanged() {
-    onDrawingsChangedCallback?.();
+function redrawCurrentFrame() {
+    const frame = video.getCurrentFrame();
+    const drawings = annotations.getFrameAnnotations(frame);
+    rendering.renderFrame(ctx, drawings, getCanvasSize());
 }
 
 /**
  * 
- * @param {number} x x coordinate of the point relative to the canvas
- * @param {number} y y coordinate of the point relative to the canvas
- * @returns {Point}
+ * @param {number} frame 
  */
-function pixelsToPoint(x, y) {
-    return [x / canvasWidth, y / canvasHeight];
+function redrawFrame(frame) {
+    const drawings = annotations.getFrameAnnotations(frame);
+    rendering.renderFrame(ctx, drawings, getCanvasSize());
 }
 
-function applyCanvasStyle() {
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-    ctx.strokeStyle = color;
+/**
+ * 
+ * @returns {ElementSize} canvas size
+ */
+function getCanvasSize() {
+    return {
+        width: canvas.width,
+        height: canvas.height
+    }
 }
-
 /**
  * Removes the last drawing from the canvas
  */
 function undoStroke() {
     const currentFrame = video.getCurrentFrame();
     annotations.removeLastAnnotation(currentFrame);
-    redrawFrameCanvas(currentFrame);
+    redrawCurrentFrame();
 }
 
 function deleteCanvas() {
     const currentFrame = video.getCurrentFrame();
     annotations.removeFrameAnnotations(currentFrame);
-    redrawFrameCanvas(currentFrame);
-}
-
-/**
- * Draws all the drawings a user did on a specific frame
- * @param {number} frame 
- */
-export function redrawFrameCanvas(frame) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const drawings = annotations.getFrameAnnotations(frame);
-    for (const drawing of drawings) {
-        switch (drawing.type) {
-            case "stroke":
-                drawStroke(drawing); 
-                break;
-            case "clear":
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                break;
-            case "text":
-                drawText(drawing);
-                break;
-            default:
-                break;
-        }
-    }
-    onDrawingsChanged();
-    ctx.beginPath();
-}
-
-/**
- * Draws a singular stroke on the current canvas
- * @param {Stroke} stroke 
- */
-function drawStroke(stroke) {
-    ctx.strokeStyle = stroke.color;
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-
-    ctx.beginPath();
-
-    for (let i = 0; i < stroke.points.length; i++) {
-        const p = pointToPixels(stroke.points[i]);
-
-        if (i === 0) {
-            ctx.moveTo(p[0], p[1]);
-        } else {
-            ctx.lineTo(p[0], p[1]);
-            ctx.stroke();
-        }
-    }
-    applyCanvasStyle();
-}
-
-/**
- * 
- * @param {MouseEvent} e 
- * @returns {[number, number]} x,y position relative to canvas
- */
-function getCanvasPosition(e) {
-    const rect = canvas.getBoundingClientRect();
-    return [e.clientX - rect.left, e.clientY - rect.top]
+    redrawCurrentFrame();
 }
 
 /**
@@ -250,7 +183,7 @@ function startDraw(e) {
         points: [],
     };
     ctx.beginPath();
-    const [x, y] = getCanvasPosition(e);
+    const [x, y] = geometry.getCanvasPosition(e, canvas);
     ctx.moveTo(x, y);
     draw(e);
 }
@@ -262,10 +195,10 @@ function startDraw(e) {
 function draw(e) {
     if (!drawing) return;
 
-    const [x,y] = getCanvasPosition(e)
+    const [x,y] = geometry.getCanvasPosition(e, canvas)
 
     if (!currentStroke) return; 
-    currentStroke.points.push(pixelsToPoint(x, y));
+    currentStroke.points.push(geometry.pixelsToPoint(x, y, getCanvasSize()));
     ctx.lineTo(x, y);
     ctx.stroke();
 }
@@ -281,26 +214,25 @@ function endDraw() {
     }
     currentStroke = null;
     ctx.closePath();
-    onDrawingsChanged();
 }
 
 /**
  * Removes everything that is on the canvas. Records the clear operation so that undo can be used
  */
 function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const currentFrame = video.getCurrentFrame();
     annotations.addFrameAnnotation(currentFrame, { type: "clear"});
+    redrawCurrentFrame();
 }
 
 /**
- * 
  * @param {boolean} value 
  */
-function setCanDraw(value) { canDraw = value; }
+function setCanDraw(value) {
+    canDraw = value;
+}
 
 /**
- * 
  * @param {HexColor} newColor 
  */
 function setColor(newColor) {
@@ -309,7 +241,6 @@ function setColor(newColor) {
 }
 
 /**
- * 
  * @param {ElementSize} size 
  */
 function setCanvasSize(size) {
@@ -317,44 +248,19 @@ function setCanvasSize(size) {
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
-    canvasWidth = size.width;
-    canvasHeight = size.height;
-    applyCanvasStyle();
+    rendering.applyCanvasStyle(ctx);
 }
 
 /**
- * 
  * @param {TextDrawing} textDrawing 
  */
-function type(textDrawing) {
-    drawText(textDrawing);
+function type(textDrawing) { 
     const currentFrame = video.getCurrentFrame();
     annotations.addFrameAnnotation(currentFrame, textDrawing);
-    onDrawingsChanged();
+    redrawCurrentFrame();
 
 }
-/**
- * 
- * @param {TextDrawing} textDrawing 
- */
-function drawText(textDrawing) {
-    const [x, y] = pointToPixels([textDrawing.x, textDrawing.y]);
-    ctx.font = "17px Arial";
-    ctx.fillStyle = textDrawing.color;
-    ctx.fillText(textDrawing.text, x, y);
-}
 
-/**
- * 
- * @param {DrawingTool} tool 
- */
-function switchTool(tool) {
-    currentTool = tool;
-    if (currentTool !== TOOLS.TEXT) {
-        textToolInput.style.display = "none";
-        textToolInput.value = "";
-    }
-}
 
-export default {init, clearCanvas, setColor, setCanDraw, redrawFrameCanvas, setCanvasSize, undoStroke,
-    setOnDrawingsChanged, deleteCanvas, drawText, switchTool};
+export default {init, clearCanvas, setColor, setCanDraw, setCanvasSize, undoStroke,
+    deleteCanvas, switchTool, redrawFrame};

@@ -10,10 +10,12 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "jszip": "^3.10.1",
+    "mediabunny": "^1.52.3",
     "mp4box": "^2.4.1"
   }
 }

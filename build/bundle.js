@@ -2407,6 +2407,7 @@
   var TOOLS = Object.freeze({ BRUSH: "brush", TEXT: "text" });
 
   // js/annotations.js
+  var onAnnotationsChangedCallback = null;
   var annotations = /* @__PURE__ */ new Map();
   function getFrameAnnotations(frame) {
     return annotations.get(frame) ?? [];
@@ -2416,13 +2417,16 @@
   }
   function clearAnnotations() {
     annotations.clear();
+    onAnnotationsChanged();
   }
   function removeFrameAnnotations(frame) {
     annotations.delete(frame);
+    onAnnotationsChanged();
   }
   function removeLastAnnotation(frame) {
     if (!annotations.has(frame)) return;
     annotations.get(frame).pop();
+    onAnnotationsChanged();
   }
   function addFrameAnnotation(frame, annotation) {
     if (!annotations.has(frame)) {
@@ -2430,6 +2434,7 @@
     }
     ;
     annotations.get(frame).push(annotation);
+    onAnnotationsChanged();
   }
   function exportAnnotations() {
     return Object.fromEntries(annotations);
@@ -2440,6 +2445,12 @@
       annotations.set(Number(frame), annotation);
     }
   }
+  function setOnAnnotationsChanged(callback) {
+    onAnnotationsChangedCallback = callback;
+  }
+  function onAnnotationsChanged() {
+    onAnnotationsChangedCallback?.();
+  }
   var annotations_default = {
     getFrameAnnotations,
     removeLastAnnotation,
@@ -2448,8 +2459,72 @@
     importAnnotations,
     getMarkedFrames,
     clearAnnotations,
-    removeFrameAnnotations
+    removeFrameAnnotations,
+    setOnAnnotationsChanged
   };
+
+  // js/canvas/geometry.js
+  function pointToPixels(point, canvasSize) {
+    return [point[0] * canvasSize.width, point[1] * canvasSize.height];
+  }
+  function pixelsToPoint(x, y, canvasSize) {
+    return [x / canvasSize.width, y / canvasSize.height];
+  }
+  function getCanvasPosition(e, canvas3) {
+    const rect = canvas3.getBoundingClientRect();
+    return [e.clientX - rect.left, e.clientY - rect.top];
+  }
+  var geometry_default = { pointToPixels, pixelsToPoint, getCanvasPosition };
+
+  // js/canvas/renderer.js
+  var LINE_WIDTH = 3;
+  var LINE_CAP = "round";
+  function renderFrame(ctx3, annotations2, canvasSize) {
+    clearCanvas(ctx3, canvasSize);
+    for (const annotation of annotations2) {
+      switch (annotation.type) {
+        case "stroke":
+          drawStroke(ctx3, annotation, canvasSize);
+          break;
+        case "clear":
+          clearCanvas(ctx3, canvasSize);
+          break;
+        case "text":
+          drawText(ctx3, annotation, canvasSize);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  function clearCanvas(ctx3, canvasSize) {
+    ctx3.clearRect(0, 0, canvasSize.width, canvasSize.height);
+  }
+  function drawStroke(ctx3, stroke, canvasSize) {
+    applyCanvasStyle(ctx3);
+    ctx3.strokeStyle = stroke.color;
+    ctx3.beginPath();
+    for (let i = 0; i < stroke.points.length; i++) {
+      const p = geometry_default.pointToPixels(stroke.points[i], canvasSize);
+      if (i === 0) {
+        ctx3.moveTo(p[0], p[1]);
+      } else {
+        ctx3.lineTo(p[0], p[1]);
+        ctx3.stroke();
+      }
+    }
+  }
+  function drawText(ctx3, textDrawing, canvasSize) {
+    const [x, y] = geometry_default.pointToPixels([textDrawing.x, textDrawing.y], canvasSize);
+    ctx3.font = "17px Arial";
+    ctx3.fillStyle = textDrawing.color;
+    ctx3.fillText(textDrawing.text, x, y);
+  }
+  function applyCanvasStyle(ctx3) {
+    ctx3.lineWidth = LINE_WIDTH;
+    ctx3.lineCap = LINE_CAP;
+  }
+  var renderer_default = { renderFrame, drawText, drawStroke, clearCanvas, applyCanvasStyle };
 
   // node_modules/mp4box/dist/rolldown-runtime-w6R9maHv.mjs
   var __defProp2 = Object.defineProperty;
@@ -12500,6 +12575,7 @@
     frameCount = INVALID_VAL;
     videoFps = INVALID_VAL;
     videoTimescale = INVALID_VAL;
+    mp4File = null;
   }
   function loadVideo(file) {
     if (isLoaded) {
@@ -12520,6 +12596,7 @@
       mp4boxFile.setExtractionOptions(track.id, null, { nbSamples: Infinity });
       mp4boxFile.start();
       videoFps = fps;
+      mp4File = mp4boxFile;
     };
     mp4boxFile.onSamples = (id, user, samples) => {
       frameTimes.push(0);
@@ -12704,7 +12781,7 @@
     getMp4File
   };
 
-  // js/canvas.js
+  // js/canvas/editor.js
   var canvas;
   var ctx;
   var textToolInput;
@@ -12713,25 +12790,17 @@
   var currentStroke = null;
   var currentText = null;
   var color = "#000000";
-  var canvasWidth = 0;
-  var canvasHeight = 0;
   var currentTool = TOOLS.BRUSH;
-  var LINE_WIDTH = 3;
-  var LINE_CAP = "round";
-  var onDrawingsChangedCallback = null;
   function init2() {
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
     textToolInput = document.getElementById("textTool");
-    applyCanvasStyle();
+    renderer_default.applyCanvasStyle(ctx);
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("mouseout", onMouseOut);
     canvas.addEventListener("mousemove", onMouseMove);
     textToolInput.addEventListener("keydown", onTextKeyDown);
-  }
-  function pointToPixels(point) {
-    return [point[0] * canvasWidth, point[1] * canvasHeight];
   }
   function onTextKeyDown(e) {
     e.stopPropagation();
@@ -12772,12 +12841,12 @@
     }
   }
   function createTextBox(e) {
-    const [x, y] = getCanvasPosition(e);
+    const [x, y] = geometry_default.getCanvasPosition(e, canvas);
     textToolInput.style.left = `${x}px`;
     textToolInput.style.top = `${y}px`;
     textToolInput.style.display = "block";
     requestAnimationFrame(() => textToolInput.focus());
-    const [relativeX, relativeY] = pixelsToPoint(x, y);
+    const [relativeX, relativeY] = geometry_default.pixelsToPoint(x, y, getCanvasSize());
     console.log(document.activeElement);
     currentText = {
       type: "text",
@@ -12787,70 +12856,37 @@
       y: relativeY
     };
   }
-  function setOnDrawingsChanged(callback) {
-    onDrawingsChangedCallback = callback;
+  function switchTool(tool) {
+    currentTool = tool;
+    if (currentTool !== TOOLS.TEXT) {
+      textToolInput.style.display = "none";
+      textToolInput.value = "";
+    }
   }
-  function onDrawingsChanged() {
-    onDrawingsChangedCallback?.();
+  function redrawCurrentFrame() {
+    const frame = video_default.getCurrentFrame();
+    const drawings = annotations_default.getFrameAnnotations(frame);
+    renderer_default.renderFrame(ctx, drawings, getCanvasSize());
   }
-  function pixelsToPoint(x, y) {
-    return [x / canvasWidth, y / canvasHeight];
+  function redrawFrame(frame) {
+    const drawings = annotations_default.getFrameAnnotations(frame);
+    renderer_default.renderFrame(ctx, drawings, getCanvasSize());
   }
-  function applyCanvasStyle() {
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-    ctx.strokeStyle = color;
+  function getCanvasSize() {
+    return {
+      width: canvas.width,
+      height: canvas.height
+    };
   }
   function undoStroke() {
     const currentFrame2 = video_default.getCurrentFrame();
     annotations_default.removeLastAnnotation(currentFrame2);
-    redrawFrameCanvas(currentFrame2);
+    redrawCurrentFrame();
   }
   function deleteCanvas() {
     const currentFrame2 = video_default.getCurrentFrame();
     annotations_default.removeFrameAnnotations(currentFrame2);
-    redrawFrameCanvas(currentFrame2);
-  }
-  function redrawFrameCanvas(frame) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const drawings = annotations_default.getFrameAnnotations(frame);
-    for (const drawing2 of drawings) {
-      switch (drawing2.type) {
-        case "stroke":
-          drawStroke(drawing2);
-          break;
-        case "clear":
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          break;
-        case "text":
-          drawText(drawing2);
-          break;
-        default:
-          break;
-      }
-    }
-    onDrawingsChanged();
-    ctx.beginPath();
-  }
-  function drawStroke(stroke) {
-    ctx.strokeStyle = stroke.color;
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.lineCap = LINE_CAP;
-    ctx.beginPath();
-    for (let i = 0; i < stroke.points.length; i++) {
-      const p = pointToPixels(stroke.points[i]);
-      if (i === 0) {
-        ctx.moveTo(p[0], p[1]);
-      } else {
-        ctx.lineTo(p[0], p[1]);
-        ctx.stroke();
-      }
-    }
-    applyCanvasStyle();
-  }
-  function getCanvasPosition(e) {
-    const rect = canvas.getBoundingClientRect();
-    return [e.clientX - rect.left, e.clientY - rect.top];
+    redrawCurrentFrame();
   }
   function startDraw(e) {
     drawing = true;
@@ -12860,15 +12896,15 @@
       points: []
     };
     ctx.beginPath();
-    const [x, y] = getCanvasPosition(e);
+    const [x, y] = geometry_default.getCanvasPosition(e, canvas);
     ctx.moveTo(x, y);
     draw(e);
   }
   function draw(e) {
     if (!drawing) return;
-    const [x, y] = getCanvasPosition(e);
+    const [x, y] = geometry_default.getCanvasPosition(e, canvas);
     if (!currentStroke) return;
-    currentStroke.points.push(pixelsToPoint(x, y));
+    currentStroke.points.push(geometry_default.pixelsToPoint(x, y, getCanvasSize()));
     ctx.lineTo(x, y);
     ctx.stroke();
   }
@@ -12880,12 +12916,11 @@
     }
     currentStroke = null;
     ctx.closePath();
-    onDrawingsChanged();
   }
-  function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function clearCanvas2() {
     const currentFrame2 = video_default.getCurrentFrame();
     annotations_default.addFrameAnnotation(currentFrame2, { type: "clear" });
+    redrawCurrentFrame();
   }
   function setCanDraw(value) {
     canDraw = value;
@@ -12899,41 +12934,23 @@
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
-    canvasWidth = size.width;
-    canvasHeight = size.height;
-    applyCanvasStyle();
+    renderer_default.applyCanvasStyle(ctx);
   }
   function type(textDrawing) {
-    drawText(textDrawing);
     const currentFrame2 = video_default.getCurrentFrame();
     annotations_default.addFrameAnnotation(currentFrame2, textDrawing);
-    onDrawingsChanged();
+    redrawCurrentFrame();
   }
-  function drawText(textDrawing) {
-    const [x, y] = pointToPixels([textDrawing.x, textDrawing.y]);
-    ctx.font = "17px Arial";
-    ctx.fillStyle = textDrawing.color;
-    ctx.fillText(textDrawing.text, x, y);
-  }
-  function switchTool(tool) {
-    currentTool = tool;
-    if (currentTool !== TOOLS.TEXT) {
-      textToolInput.style.display = "none";
-      textToolInput.value = "";
-    }
-  }
-  var canvas_default = {
+  var editor_default = {
     init: init2,
-    clearCanvas,
+    clearCanvas: clearCanvas2,
     setColor,
     setCanDraw,
-    redrawFrameCanvas,
     setCanvasSize,
     undoStroke,
-    setOnDrawingsChanged,
     deleteCanvas,
-    drawText,
-    switchTool
+    switchTool,
+    redrawFrame
   };
 
   // js/playbackControls.js
@@ -13052,26 +13069,26 @@
     deleteBtn.addEventListener("click", onDeleteBtnClick);
   }
   function onBrushBtnClick() {
-    canvas_default.switchTool(TOOLS.BRUSH);
+    editor_default.switchTool(TOOLS.BRUSH);
     brushBtn.classList.add("active");
     textBtn.classList.remove("active");
   }
   function onTextBtnClick() {
-    canvas_default.switchTool(TOOLS.TEXT);
+    editor_default.switchTool(TOOLS.TEXT);
     textBtn.classList.add("active");
     brushBtn.classList.remove("active");
   }
   function onDeleteBtnClick() {
-    canvas_default.deleteCanvas();
+    editor_default.deleteCanvas();
   }
   function onColorBtnClick() {
     colorInput.click();
   }
   function onClearBtnClick() {
-    canvas_default.clearCanvas();
+    editor_default.clearCanvas();
   }
   function onColorInputChange() {
-    canvas_default.setColor(colorInput.value);
+    editor_default.setColor(colorInput.value);
     colorPreview.style.backgroundColor = colorInput.value;
   }
   var canvasControls_default = { init: init4 };
@@ -13089,7 +13106,6 @@
     zip.file("video.mp4", video_default.getVideoFile());
     zip.file("annotations.json", JSON.stringify(annotations_default.exportAnnotations()));
     const blob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(blob);
     const handle = await window.showSaveFilePicker({
       suggestedName: "project" + FILE_EXTENSION,
       types: [
@@ -13131,60 +13147,6 @@
     if (!file) {
       console.log("Video file or info not loaded!");
       return;
-    }
-    const decoder = new VideoDecoder({
-      output: (frame) => {
-        console.log(frame);
-        frame.close();
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
-    const description = getDecoderConfig();
-    if (!description) {
-      console.log("Could not generate the decoder config");
-      return;
-    }
-    ;
-    decoder.configure(description);
-    decodeChunks(decoder);
-    await decoder.flush();
-    decoder.close();
-  }
-  function getDecoderConfig() {
-    const mp4File2 = video_default.getMp4File();
-    const videoInfo2 = video_default.getMp4Info();
-    if (!videoInfo2 || !mp4File2) return;
-    const codec = videoInfo2.videoTracks[0].codec;
-    const entry = (
-      /** @type {Mp4Box.VisualSampleEntry} */
-      mp4File2.moov.trak.mdia.minf.stbl.stsd.entries[0]
-    );
-    if (codec.startsWith("avc1")) {
-      return {
-        codec,
-        description: entry.avcC
-      };
-    }
-    if (codec.startsWith("hvc1")) {
-      return {
-        codec,
-        description: entry.hvcC
-      };
-    }
-    return null;
-  }
-  function decodeChunks(decoder) {
-    const samples = video_default.getVideoSamples();
-    for (const sample of samples) {
-      if (!sample.data) continue;
-      let frame = new EncodedVideoChunk({
-        type: sample.is_sync ? "key" : "delta",
-        timestamp: sample.cts,
-        data: sample.data
-      });
-      decoder.decode(frame);
     }
   }
   var burning_default = { burnVideo };
@@ -13302,7 +13264,7 @@
   init7();
   function init7() {
     video_default.init();
-    canvas_default.init();
+    editor_default.init();
     playbackControls_default.init();
     canvasControls_default.init();
     fileControls_default.init();
@@ -13312,7 +13274,7 @@
     video_default.setOnEnded(onVideoEnd);
     video_default.setOnLoadStarted(onVideoLoadingStarted);
     document.addEventListener("keydown", onKeyDown);
-    canvas_default.setOnDrawingsChanged(onDrawingsChanged2);
+    annotations_default.setOnAnnotationsChanged(onAnnotationsChanged2);
   }
   function onKeyDown(event) {
     if (event.code === "ArrowLeft") video_default.previousFrame();
@@ -13320,9 +13282,9 @@
     if (event.code === "Space") toggleVideoPlayback();
     if (event.code === "ArrowUp") playbackControls_default.increaseVolume();
     if (event.code === "ArrowDown") playbackControls_default.decreaseVolume();
-    if (event.code === "KeyZ" && event.ctrlKey) canvas_default.undoStroke();
+    if (event.code === "KeyZ" && event.ctrlKey) editor_default.undoStroke();
   }
-  function onDrawingsChanged2() {
+  function onAnnotationsChanged2() {
     markers_default.redraw(annotations_default.getMarkedFrames(), video_default.getFrameCount());
   }
   function toggleVideoPlayback() {
@@ -13336,12 +13298,12 @@
     }
   }
   function onVideoLoadingStarted() {
-    canvas_default.setCanDraw(false);
+    editor_default.setCanDraw(false);
     annotations_default.clearAnnotations();
   }
   function onVideoLoad() {
-    canvas_default.setCanvasSize(video_default.getVideoSize());
-    canvas_default.setCanDraw(true);
+    editor_default.setCanvasSize(video_default.getVideoSize());
+    editor_default.setCanDraw(true);
     playbackControls_default.setSeekerValue(0);
     playbackControls_default.setFrameCounterTxt(0);
     playbackControls_default.setSeekerMaximum(video_default.getFrameCount() - 1);
@@ -13351,7 +13313,7 @@
   function onFrameChange(frame) {
     playbackControls_default.setSeekerValue(frame);
     playbackControls_default.setFrameCounterTxt(frame);
-    canvas_default.redrawFrameCanvas(frame);
+    editor_default.redrawFrame(frame);
   }
   function onVideoEnd() {
     playbackControls_default.setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);

@@ -1,12 +1,11 @@
 import { PLAYBACK_BUTTON } from "./types.js";
-import canvas from "./canvas.js";
+import canvas from "./canvas/editor.js";
 import video from "./video.js";
 import playbackControls from "./playbackControls.js";
 import canvasControls from "./canvasControls.js";
 import fileControls from "./fileControls.js";
 import markers from "./markers.js";
 import annotations from "./annotations.js";
-
 
 init();
 
@@ -22,8 +21,8 @@ function init() {
     video.setOnFrameChanged(onFrameChange);
     video.setOnEnded(onVideoEnd);
     video.setOnLoadStarted(onVideoLoadingStarted);
-    document.addEventListener("keydown", onKeyDown)
-    canvas.setOnDrawingsChanged(onDrawingsChanged);
+    document.addEventListener("keydown", onKeyDown);
+    annotations.setOnAnnotationsChanged(onAnnotationsChanged);
 }
 
 /**
@@ -38,7 +37,7 @@ function onKeyDown(event) {
     if (event.code === "KeyZ" && event.ctrlKey) canvas.undoStroke();
 }
 
-function onDrawingsChanged() {
+function onAnnotationsChanged() {
     markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
 }
 
@@ -74,7 +73,7 @@ function onVideoLoad() {
 function onFrameChange(frame) {
     playbackControls.setSeekerValue(frame);
     playbackControls.setFrameCounterTxt(frame);
-    canvas.redrawFrameCanvas(frame);
+    canvas.redrawFrame(frame);
 }
 
 function onVideoEnd() {
