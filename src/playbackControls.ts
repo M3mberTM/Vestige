@@ -1,37 +1,23 @@
-/**@import {RangeInput} from "./types" */
-import video from "./video.js";
-import {PlaybackButton} from "./types.js";
+import video from "./video";
+import {PlaybackButton, type RangeInput} from "./types";
 
 const VOLUME_SLIDER_MAX = 1000;
 const VOLUME_STEP = 20;
 
-// video controls
-/** @type {HTMLButtonElement} */
-let playPauseBtn;
-/** @type {RangeInput} */
-let seekerSlider;
-/** @type {RangeInput} */
-let volumeSlider;
-/** @type {HTMLButtonElement} */
-let prevFrameBtn;
-/** @type {HTMLButtonElement} */
-let nextFrameBtn;
-/** @type {HTMLHeadingElement} */
-let frameCounterTxt;
+let playPauseBtn: HTMLButtonElement;
+let seekerSlider: RangeInput;
+let volumeSlider: RangeInput;
+let prevFrameBtn: HTMLButtonElement;
+let nextFrameBtn: HTMLButtonElement;
+let frameCounterTxt: HTMLHeadingElement;
 
 function init() {
-    // @ts-ignore
-    playPauseBtn = document.getElementById("playPause");
-    // @ts-ignore
-    seekerSlider = document.getElementById("seeker");
-    // @ts-ignore
-    volumeSlider = document.getElementById("volumeSlider");
-    // @ts-ignore
-    prevFrameBtn = document.getElementById("prevFrame");
-    // @ts-ignore
-    nextFrameBtn = document.getElementById("nextFrame");
-    // @ts-ignore
-    frameCounterTxt = document.getElementById("currentFrameTxt");
+    playPauseBtn = document.getElementById("playPause") as HTMLButtonElement;
+    seekerSlider = document.getElementById("seeker") as RangeInput;
+    volumeSlider = document.getElementById("volumeSlider") as RangeInput;
+    prevFrameBtn = document.getElementById("prevFrame") as HTMLButtonElement;
+    nextFrameBtn = document.getElementById("nextFrame") as HTMLButtonElement;
+    frameCounterTxt = document.getElementById("currentFrameTxt") as HTMLHeadingElement;
 
     seekerSlider.addEventListener("keydown", (e) => {
         if (
@@ -104,35 +90,19 @@ function onPlayBtnClick() {
     }
 }
 
-/**
- * 
- * @param {number} value 
- */
-function setSeekerValue(value) {
+function setSeekerValue(value: number) {
     seekerSlider.valueAsNumber = value;
 }
 
-/**
- * 
- * @param {number} frameNum 
- */
-function setFrameCounterTxt(frameNum) {
+function setFrameCounterTxt(frameNum: number) {
     frameCounterTxt.textContent = String(frameNum);
 }
 
-/**
- * 
- * @param {PlaybackButton} value 
- */
-function setPlayPauseBtnContent(value) {
+function setPlayPauseBtnContent(value: PlaybackButton) {
     playPauseBtn.textContent = value;
 }
 
-/**
- * 
- * @param {number} value 
- */
-function setSeekerMaximum(value) {
+function setSeekerMaximum(value: number) {
     seekerSlider.max = String(value); 
 }
 

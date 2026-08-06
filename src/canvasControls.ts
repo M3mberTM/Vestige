@@ -1,36 +1,22 @@
 import canvas from "./canvas/editor.js";
 import { Tool } from "./types";
 
-/** @type {HTMLInputElement} */
-let colorInput;
-/** @type {HTMLButtonElement} */
-let clearBtn;
-/** @type {HTMLButtonElement} */
-let deleteBtn;
-/** @type {HTMLButtonElement} */
-let brushBtn;
-/** @type {HTMLButtonElement} */
-let textBtn;
-/** @type {HTMLDivElement} */
-let colorBtn;
-/** @type {HTMLDivElement} */
-let colorPreview;
+let colorInput: HTMLInputElement;
+let clearBtn: HTMLButtonElement;
+let deleteBtn: HTMLButtonElement;
+let brushBtn: HTMLButtonElement;
+let textBtn: HTMLButtonElement;
+let colorBtn: HTMLDivElement;
+let colorPreview: HTMLDivElement;
 
 function init() {
-    // @ts-ignore
-    colorInput = document.getElementById("colorPicker");
-    // @ts-ignore
-    clearBtn = document.getElementById("clearCanvasBtn");
-    // @ts-ignore
-    colorBtn = document.getElementById("colorBtn");
-    // @ts-ignore
-    colorPreview = document.getElementById("colorPreview");
-    // @ts-ignore
-    deleteBtn = document.getElementById("deleteCanvasBtn");
-    // @ts-ignore
-    brushBtn = document.getElementById("brushBtn");
-    // @ts-ignore
-    textBtn = document.getElementById("textBtn");
+    colorInput = document.getElementById("colorPicker") as HTMLInputElement;
+    clearBtn = document.getElementById("clearCanvasBtn") as HTMLButtonElement;
+    colorBtn = document.getElementById("colorBtn") as HTMLDivElement;
+    colorPreview = document.getElementById("colorPreview") as HTMLDivElement;
+    deleteBtn = document.getElementById("deleteCanvasBtn") as HTMLButtonElement;
+    brushBtn = document.getElementById("brushBtn") as HTMLButtonElement;
+    textBtn = document.getElementById("textBtn") as HTMLButtonElement;
 
     colorInput.addEventListener("input", onColorInputChange);
     clearBtn.addEventListener("click", onClearBtnClick);

@@ -32817,7 +32817,7 @@ The @mediabunny/mp3-encoder extension package provides support for encoding MP3.
     redrawFrame
   };
 
-  // src/playbackControls.js
+  // src/playbackControls.ts
   var VOLUME_SLIDER_MAX = 1e3;
   var VOLUME_STEP = 20;
   var playPauseBtn;
@@ -32909,7 +32909,7 @@ The @mediabunny/mp3-encoder extension package provides support for encoding MP3.
     setFrameCounterTxt
   };
 
-  // src/canvasControls.js
+  // src/canvasControls.ts
   var colorInput;
   var clearBtn;
   var deleteBtn;
@@ -32971,7 +32971,6 @@ The @mediabunny/mp3-encoder extension package provides support for encoding MP3.
     zip.file("annotations.json", JSON.stringify(annotations_default.exportAnnotations()));
     const blob = await zip.generateAsync({ type: "blob" });
     const handle = await window.showSaveFilePicker({
-      // FIX adjust so that it does not give error
       suggestedName: "project" + FILE_EXTENSION,
       types: [
         {

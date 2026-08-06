@@ -66,7 +66,7 @@ function onFileInput() {
     if (file.name.endsWith(FILE_EXTENSION)) {
         project.loadProject(file).catch((err) => console.error(err));
     } else {
-        video.loadVideo(file);
+        video.loadVideo(file); // TODO add gif support
     }
 }
 
@@ -78,6 +78,8 @@ function onVsieBtnClick() {
 
 function onMp4BtnClick() {
     console.log("burn in the video");
+    // TODO update to allow users to pick different video types to export into along with gif
+    // TODO show spinner when video is being burned and don't allow other exporting or importing
     burning.burnVideo().then(() => {
         console.log("Successfully burned annotations into the video");
     }).catch((err) => console.error(err));

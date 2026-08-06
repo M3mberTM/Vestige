@@ -1,11 +1,11 @@
 import { PlaybackButton } from "./types";
-import canvas from "./canvas/editor.js";
-import video from "./video.js";
-import playbackControls from "./playbackControls.js";
-import canvasControls from "./canvasControls.js";
-import fileControls from "./fileControls.js";
-import markers from "./markers.js";
-import annotations from "./annotations.js";
+import canvas from "./canvas/editor";
+import video from "./video";
+import playbackControls from "./playbackControls";
+import canvasControls from "./canvasControls";
+import fileControls from "./fileControls";
+import markers from "./markers";
+import annotations from "./annotations";
 
 init();
 
@@ -26,6 +26,7 @@ function init() {
 }
 
 function onKeyDown(event: KeyboardEvent) {
+    // TODO add shortcuts for switching between the tools
     if (event.code === "ArrowLeft") video.previousFrame();
     if (event.code === "ArrowRight") video.nextFrame();
     if (event.code === "Space") toggleVideoPlayback();

@@ -1,7 +1,7 @@
-import video from "./video.js";
-import annotations from "./annotations.js";
+import video from "./video";
+import annotations from "./annotations";
 import JSZip from "jszip";
-import { FILE_EXTENSION } from "./constants.js";
+import { FILE_EXTENSION } from "./constants";
 
 
 async function saveProject() {
@@ -12,7 +12,7 @@ async function saveProject() {
     zip.file("annotations.json", JSON.stringify(annotations.exportAnnotations()));
 
     const blob = await zip.generateAsync({ type: "blob" });
-    const handle = await window.showSaveFilePicker({ // FIX adjust so that it does not give error
+    const handle = await window.showSaveFilePicker({
         suggestedName: "project" + FILE_EXTENSION,
         types: [
             {

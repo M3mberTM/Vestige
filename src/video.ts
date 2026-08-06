@@ -63,10 +63,11 @@ async function loadVideo(file: File) {
         formats: MediaBunny.ALL_FORMATS,
         source: new MediaBunny.BlobSource(file),
     });
-
+    // TODO when this throws error, format is unsupported. inform user that format is not supported
     const videoTrack = await input.getPrimaryVideoTrack();
     if (!videoTrack) {
-        throw new Error("Could not get a video track");
+        throw new Error("Could not get a video track"); // TODO don't forget to revoke url if this happens
+        // TODO hide spinner as the video is no longer loading
     }
     // precalculate the frame times in advance to not have to deal with calculation on the fly
     const sink = new MediaBunny.VideoSampleSink(videoTrack)

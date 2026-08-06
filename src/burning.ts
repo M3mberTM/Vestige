@@ -61,6 +61,7 @@ async function burnVideo() {
         type: "video/mp4",
     });
 
+    // TODO update logic to allow user to specify where to save the file
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
