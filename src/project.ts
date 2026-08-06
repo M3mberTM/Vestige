@@ -12,9 +12,7 @@ async function saveProject() {
     zip.file("annotations.json", JSON.stringify(annotations.exportAnnotations()));
 
     const blob = await zip.generateAsync({ type: "blob" });
-
-    // @ts-ignore
-    const handle = await window.showSaveFilePicker({
+    const handle = await window.showSaveFilePicker({ // FIX adjust so that it does not give error
         suggestedName: "project" + FILE_EXTENSION,
         types: [
             {
@@ -31,11 +29,7 @@ async function saveProject() {
     await writable.close();
 }
 
-/**
- * 
- * @param {File} file 
- */
-async function loadProject(file) {
+async function loadProject(file: File) {
     const zip = await JSZip.loadAsync(file);
 
     const videoBlob = await zip.file("video.mp4")?.async("blob");

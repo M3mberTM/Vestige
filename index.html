@@ -17,7 +17,10 @@
                 <input type="file" id="videoInput" accept="video/*,.vsie">
                 <button class="button" id="videoInputBtn">Choose File</button>
                 <div class="dropdown" id="dropdown">
-                    <button class="button" id="exportBtn">Export As...<div id="spinner"></div></button>
+                    <button class="button" id="exportBtn">
+                        Export As...
+                        <div id="exportSpinner" class="spinner"></div>
+                    </button>
 
                     <div class="dropdownContent" id="dropdownContent">
                         <button class="button dropdownItem" id="vsieBtn">.vsie</button>
@@ -57,6 +60,7 @@
                 <video id="video" class="viewerContent"></video>
                 <canvas id="canvas" class="viewerContent"></canvas>
                 <input type="text" id="textTool">
+                <div id="videoSpinner" class="spinner"></div>
             </div>
             <div class="controlsContainer">
                 <div class="timeline">

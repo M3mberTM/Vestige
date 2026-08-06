@@ -266,19 +266,30 @@ body {
     display: flex;
 }
 
-#spinner {
+.spinner {
     display:none;
     width: 15px;
     height: 15px;
-    border: 3px solid rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(0, 0, 0, 0.2);
     border-top-color: var(--tintedHighlight); 
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     box-sizing: border-box;
 }
 
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
+}
+
+#videoSpinner {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 5px solid rgba(0, 0, 0, 0.2);
+    border-top-color: var(--highlight); 
 }

@@ -3,39 +3,24 @@ import project from "./project.js";
 import { FILE_EXTENSION } from "./constants.js";
 import burning from "./burning.js";
 
-/** @type {HTMLInputElement} */
-let fileInput;
-/** @type {HTMLButtonElement} */
-let fileInputBtn;
-/** @type {HTMLButtonElement} */
-let exportBtn;
-/** @type {HTMLButtonElement} */
-let vsieBtn;
-/** @type {HTMLButtonElement} */
-let mp4Btn;
-/** @type {HTMLDivElement} */
-let fileDropdown;
-/** @type {HTMLDivElement} */
-let fileOptions;
+let fileInput: HTMLInputElement;
+let fileInputBtn: HTMLButtonElement;
+let exportBtn: HTMLButtonElement;
+let vsieBtn: HTMLButtonElement;
+let mp4Btn: HTMLButtonElement;
+let fileDropdown: HTMLDivElement;
+let fileOptions: HTMLDivElement;
 
-/** @type {number | null} */
-let dropdownTimeout = null;
+let dropdownTimeout: number | null = null;
 
 function init() {
-    // @ts-ignore
-    fileInput = document.getElementById("videoInput");
-    // @ts-ignore
-    fileInputBtn = document.getElementById("videoInputBtn");
-    // @ts-ignore
-    exportBtn = document.getElementById("exportBtn");
-    // @ts-ignore
-    vsieBtn = document.getElementById("vsieBtn");
-    // @ts-ignore
-    mp4Btn = document.getElementById("mp4Btn");
-    // @ts-ignore
-    fileDropdown = document.getElementById("dropdown");
-    // @ts-ignore
-    fileOptions = document.getElementById("dropdownContent");
+    fileInput = document.getElementById("videoInput") as HTMLInputElement;
+    fileInputBtn = document.getElementById("videoInputBtn") as HTMLButtonElement;
+    exportBtn = document.getElementById("exportBtn") as HTMLButtonElement;
+    vsieBtn = document.getElementById("vsieBtn") as HTMLButtonElement;
+    mp4Btn = document.getElementById("mp4Btn") as HTMLButtonElement;
+    fileDropdown = document.getElementById("dropdown") as HTMLDivElement;
+    fileOptions = document.getElementById("dropdownContent") as HTMLDivElement;
 
     const preventBtns = [vsieBtn, mp4Btn, exportBtn, fileInputBtn];
     for (const button of preventBtns) {
@@ -94,7 +79,7 @@ function onVsieBtnClick() {
 function onMp4BtnClick() {
     console.log("burn in the video");
     burning.burnVideo().then(() => {
-        console.log("burned");
+        console.log("Successfully burned annotations into the video");
     }).catch((err) => console.error(err));
 }
 

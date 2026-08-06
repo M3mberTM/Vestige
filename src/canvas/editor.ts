@@ -2,38 +2,29 @@ import annotations from "../annotations";
 import geometry from "./geometry";
 import rendering from "./renderer";
 import video from "../video";
-import { TOOLS } from "../types";
-/** @import {Stroke, ElementSize, HexColor, DrawingTool, TextDrawing} from "../types" */
+import { Tool } from "../types";
+import type { Stroke, ElementSize, HexColor, TextDrawing } from "../types";
 
-/** @type {HTMLCanvasElement} */
-let canvas;
-/** @type {CanvasRenderingContext2D} */
-let ctx;
-/** @type {HTMLInputElement} */
-let textToolInput;
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
+let textToolInput: HTMLInputElement;
 
 
 let canDraw = false;
 let drawing = false;
-/** @type {Stroke | null} */
-let currentStroke = null;
-/** @type {TextDrawing | null} */
-let currentText = null;
-let color = "#000000";
 
-/** @type {DrawingTool} */
-let currentTool = TOOLS.BRUSH;
+let currentStroke: Stroke | null = null;
+let currentText: TextDrawing | null = null;
+let color: HexColor = "#000000";
+let currentTool = Tool.BRUSH;
 
 /**
  * Sets up the website canvas properly and adds event listeners
  */
 function init() {
-    // @ts-ignore
-    canvas = document.getElementById("canvas");
-    // @ts-ignore
-    ctx = canvas.getContext("2d");
-    // @ts-ignore
-    textToolInput = document.getElementById("textTool");
+    canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    textToolInput = document.getElementById("textTool") as HTMLInputElement;
 
     rendering.applyCanvasStyle(ctx);
 
@@ -45,11 +36,7 @@ function init() {
 }
 
 
-/**
- * 
- * @param {KeyboardEvent} e 
- */
-function onTextKeyDown(e) {
+function onTextKeyDown(e: KeyboardEvent) {
     e.stopPropagation();
     if (e.code === "Enter") {
         if (!currentText) return;
@@ -60,47 +47,39 @@ function onTextKeyDown(e) {
         currentText = null;
     }
 }
-/**
- * 
- * @param {MouseEvent} e 
- */
-function onMouseMove(e) {
+
+function onMouseMove(e: MouseEvent) {
     if (!canDraw) return;
-    if (currentTool === TOOLS.BRUSH) {
+    if (currentTool === Tool.BRUSH) {
         draw(e);
     }
 }
+
 function onMouseOut() {
     if (!canDraw) return;
-    if (currentTool === TOOLS.BRUSH) {
+    if (currentTool === Tool.BRUSH) {
         endDraw();
     }
 }
 
 function onMouseUp() {
     if (!canDraw) return;
-    if (currentTool === TOOLS.BRUSH) {
+    if (currentTool === Tool.BRUSH) {
         endDraw();
     }
 }
-/**
- * 
- * @param {MouseEvent} e 
- */
-function onMouseDown(e) {
+
+function onMouseDown(e: MouseEvent) {
     if (!canDraw) return;
-    if (currentTool === TOOLS.BRUSH) {
+    if (currentTool === Tool.BRUSH) {
         startDraw(e);
     }
-    if (currentTool === TOOLS.TEXT) {
+    if (currentTool === Tool.TEXT) {
         createTextBox(e);
     }
 }
 
-/**
- * @param {MouseEvent} e 
- */
-function createTextBox(e) {
+function createTextBox(e: MouseEvent) {
     const [x,y] = geometry.getCanvasPosition(e, canvas);
     textToolInput.style.left = `${x}px`;
     textToolInput.style.top = `${y}px`;
@@ -116,13 +95,9 @@ function createTextBox(e) {
     }
 }
 
-/**
- * 
- * @param {DrawingTool} tool 
- */
-function switchTool(tool) {
+function switchTool(tool: Tool) {
     currentTool = tool;
-    if (currentTool !== TOOLS.TEXT) {
+    if (currentTool !== Tool.TEXT) {
         textToolInput.style.display = "none";
         textToolInput.value = "";
     }
@@ -135,11 +110,7 @@ function redrawCurrentFrame() {
     rendering.renderFrame(ctx, drawings, getCanvasSize());
 }
 
-/**
- * 
- * @param {number} frame 
- */
-function redrawFrame(frame) {
+function redrawFrame(frame: number) {
     const drawings = annotations.getFrameAnnotations(frame);
     rendering.clearCanvas(ctx, getCanvasSize());
     rendering.renderFrame(ctx, drawings, getCanvasSize());
@@ -172,9 +143,8 @@ function deleteCanvas() {
 
 /**
  * Sets up the drawing process
- * @param {MouseEvent} e 
  */
-function startDraw(e) {
+function startDraw(e: MouseEvent) {
     drawing = true;
     currentStroke = {
         type: "stroke",
@@ -189,9 +159,8 @@ function startDraw(e) {
 
 /**
  * Responsible for the drawing process. Draws on the canvas
- * @param {MouseEvent} e 
  */
-function draw(e) {
+function draw(e: MouseEvent) {
     if (!drawing) return;
 
     const [x,y] = geometry.getCanvasPosition(e, canvas)
@@ -224,36 +193,25 @@ function clearCanvas() {
     redrawCurrentFrame();
 }
 
-/**
- * @param {boolean} value 
- */
-function setCanDraw(value) {
+function setCanDraw(value: boolean) {
     canDraw = value;
 }
 
-/**
- * @param {HexColor} newColor 
- */
-function setColor(newColor) {
+function setColor(newColor: HexColor) {
     color = newColor;
     ctx.strokeStyle = color;
 }
 
-/**
- * @param {ElementSize} size 
- */
-function setCanvasSize(size) {
+function setCanvasSize(size: ElementSize) {
     canvas.width = size.width;
     canvas.height = size.height;
     canvas.style.width = size.width + "px";
     canvas.style.height = size.height + "px";
+    ctx.strokeStyle = color;
     rendering.applyCanvasStyle(ctx);
 }
 
-/**
- * @param {TextDrawing} textDrawing 
- */
-function type(textDrawing) { 
+function type(textDrawing: TextDrawing) { 
     const currentFrame = video.getCurrentFrame();
     annotations.addFrameAnnotation(currentFrame, textDrawing);
     redrawCurrentFrame();

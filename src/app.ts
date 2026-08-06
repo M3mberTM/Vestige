@@ -1,4 +1,4 @@
-import { PLAYBACK_BUTTON } from "./types.js";
+import { PlaybackButton } from "./types";
 import canvas from "./canvas/editor.js";
 import video from "./video.js";
 import playbackControls from "./playbackControls.js";
@@ -25,10 +25,7 @@ function init() {
     annotations.setOnAnnotationsChanged(onAnnotationsChanged);
 }
 
-/**
- * @param {KeyboardEvent} event 
- */
-function onKeyDown(event) {
+function onKeyDown(event: KeyboardEvent) {
     if (event.code === "ArrowLeft") video.previousFrame();
     if (event.code === "ArrowRight") video.nextFrame();
     if (event.code === "Space") toggleVideoPlayback();
@@ -38,17 +35,17 @@ function onKeyDown(event) {
 }
 
 function onAnnotationsChanged() {
-    markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
+    markers.redrawMarkers(annotations.getMarkedFrames(), video.getFrameCount());
 }
 
 function toggleVideoPlayback() {
     if (!video.isVideoLoaded()) return;
     if (video.isVideoPlaying()) {
         video.pauseVideo();
-        playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);
+        playbackControls.setPlayPauseBtnContent(PlaybackButton.PLAY);
     } else {
         video.playVideo();
-        playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PAUSE);
+        playbackControls.setPlayPauseBtnContent(PlaybackButton.PAUSE);
     }
 }
 
@@ -64,18 +61,15 @@ function onVideoLoad() {
     playbackControls.setFrameCounterTxt(0);
     playbackControls.setSeekerMaximum(video.getFrameCount() - 1);
     markers.setCanvasSize(video.getVideoSize());
-    markers.redraw(annotations.getMarkedFrames(), video.getFrameCount());
+    markers.redrawMarkers(annotations.getMarkedFrames(), video.getFrameCount());
 }
 
-/**
- * @param {number} frame 
- */
-function onFrameChange(frame) {
+function onFrameChange(frame: number) {
     playbackControls.setSeekerValue(frame);
     playbackControls.setFrameCounterTxt(frame);
     canvas.redrawFrame(frame);
 }
 
 function onVideoEnd() {
-    playbackControls.setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);
+    playbackControls.setPlayPauseBtnContent(PlaybackButton.PLAY);
 }

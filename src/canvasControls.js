@@ -1,5 +1,5 @@
 import canvas from "./canvas/editor.js";
-import { TOOLS } from "./types.js";
+import { Tool } from "./types";
 
 /** @type {HTMLInputElement} */
 let colorInput;
@@ -42,13 +42,13 @@ function init() {
 }
 
 function onBrushBtnClick() {
-    canvas.switchTool(TOOLS.BRUSH);
+    canvas.switchTool(Tool.BRUSH);
     brushBtn.classList.add("active");
     textBtn.classList.remove("active");
 }
 
 function onTextBtnClick() {
-    canvas.switchTool(TOOLS.TEXT);
+    canvas.switchTool(Tool.TEXT);
     textBtn.classList.add("active");
     brushBtn.classList.remove("active");
 }

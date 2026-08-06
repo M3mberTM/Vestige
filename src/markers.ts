@@ -1,8 +1,7 @@
-/** @import {ElementSize} from "./types" */
-/** @type {HTMLCanvasElement} */
-let canvas;
-/** @type {CanvasRenderingContext2D} */
-let ctx;
+import type { ElementSize } from "./types";
+
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
 
 const LINE_WIDTH = 1;
 const LINE_CAP = "round";
@@ -11,10 +10,8 @@ const LINE_CAP = "round";
  * Sets up the website canvas properly and adds event listeners
  */
 function init() {
-    // @ts-ignore
-    canvas = document.getElementById("markers");
-    // @ts-ignore
-    ctx = canvas.getContext("2d");
+    canvas = document.getElementById("markers") as HTMLCanvasElement;
+    ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     applyCanvasStyle();
 
@@ -26,23 +23,13 @@ function applyCanvasStyle() {
     ctx.strokeStyle = "#FCFF6C";
 }
 
-/**
- * 
- * @param {number} frame 
- * @param {number} frameCount 
- */
-function drawMarker(frame, frameCount) {
+function drawMarker(frame: number, frameCount: number) {
     const x = Math.round(frame / (frameCount - 1) * canvas.width);
     ctx.fillRect(x, 0, 2, canvas.height);
 }
 
 
-/**
- * 
- * @param {number[]} frames 
- * @param {number} frameCount 
- */
-function redraw(frames, frameCount) {
+function redrawMarkers(frames: number[], frameCount: number) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const frame of frames) {
         const x = Math.round((frame / (frameCount - 1)) * (canvas.width - 1));
@@ -53,13 +40,8 @@ function redraw(frames, frameCount) {
     }
 }
 
-/**
- * 
- * @param {ElementSize} size 
- */
-function setCanvasSize(size) {
+function setCanvasSize(size: ElementSize) {
     canvas.width = size.width;
-    // canvas.style.width = size.width + "px";
     applyCanvasStyle();
 }
-export default {init, redraw, drawMarker, setCanvasSize};
+export default {init, redrawMarkers, drawMarker, setCanvasSize};

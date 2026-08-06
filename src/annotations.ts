@@ -1,19 +1,16 @@
-/** @import {Drawing } from "./types" */
+import type {Drawing, VoidFunction} from "./types";
 
-/** * @type {(() => void) | null} */
-let onAnnotationsChangedCallback = null;
+let onAnnotationsChangedCallback: VoidFunction | null = null;
 const annotations = new Map();
 
 /**
  * Returns the drawing for a specific video frame given
- * @param {number} frame
- * @returns {Drawing[]}
 */
-function getFrameAnnotations(frame) {
+function getFrameAnnotations(frame: number): Drawing[] {
     return annotations.get(frame) ?? [];
 }
 
-function getMarkedFrames() {
+function getMarkedFrames(): number[] {
     return Array.from(annotations.keys());
 }
 
@@ -24,18 +21,16 @@ function clearAnnotations() {
 
 /**
  * Removes all the annotations on a specific frame
- * @param {number} frame 
  */
-function removeFrameAnnotations(frame) {
+function removeFrameAnnotations(frame: number) {
     annotations.delete(frame);
     onAnnotationsChanged();
 }
 
 /**
- * 
- * @param {number} frame 
+ * Removes the last annotation from a specific frame
  */
-function removeLastAnnotation(frame) {
+function removeLastAnnotation(frame: number) {
     if (!annotations.has(frame)) return;
     annotations.get(frame).pop();
     onAnnotationsChanged();
@@ -43,10 +38,8 @@ function removeLastAnnotation(frame) {
 
 /**
  * Appends a drawing to the current frame. Only if the frame annotation exists already!
- * @param {number} frame 
- * @param {Drawing} annotation 
  */
-function addFrameAnnotation(frame, annotation) {
+function addFrameAnnotation(frame: number, annotation: Drawing) {
     if (!annotations.has(frame)) {
         annotations.set(frame, []);
     };
@@ -62,21 +55,16 @@ function exportAnnotations() {
 }
 
 /**
- * 
- * @param {JSON} data 
+ * Converts JSON data into annotation map
  */
-function importAnnotations(data) {
+function importAnnotations(data: JSON) {
     annotations.clear();
     for (const [frame, annotation] of Object.entries(data)) {
         annotations.set(Number(frame), annotation);
     }
 }
 
-/**
- * 
- * @param {() => void} callback 
- */
-function setOnAnnotationsChanged(callback) {
+function setOnAnnotationsChanged(callback: VoidFunction) {
     onAnnotationsChangedCallback = callback;
 }
 

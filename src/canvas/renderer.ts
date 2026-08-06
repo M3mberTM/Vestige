@@ -1,16 +1,14 @@
 import geometry from "./geometry";
-/** @import {Stroke, TextDrawing, ElementSize, Drawing, RenderContext} from "../types" */
+import type { ElementSize, Stroke, TextDrawing, Drawing, RenderContext } from "../types";
 
 const LINE_WIDTH = 3;
 const LINE_CAP = "round";
 
 /**
  * Draws all the drawings a user did on a specific frame
- * @param {RenderContext} ctx
- * @param {Drawing[]} annotations 
- * @param {ElementSize} canvasSize
  */
-function renderFrame(ctx, annotations, canvasSize) { 
+function renderFrame(ctx: RenderContext, annotations: Drawing[], canvasSize: ElementSize) {
+    
     for (const annotation of annotations) {
         switch (annotation.type) {
             case "stroke":
@@ -30,25 +28,20 @@ function renderFrame(ctx, annotations, canvasSize) {
 
 /**
  * Clears out all the annotations from the canvas
- * @param {RenderContext} ctx
- * @param {ElementSize} canvasSize
  */
-function clearCanvas(ctx, canvasSize) {
+function clearCanvas(ctx: RenderContext, canvasSize: ElementSize) {
     ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
 }
 /**
  * Draws a singular stroke on the current canvas
- * @param {RenderContext} ctx
- * @param {Stroke} stroke 
- * @param {ElementSize} canvasSize
  */
-function drawStroke(ctx, stroke, canvasSize) { 
+function drawStroke(ctx: RenderContext, stroke: Stroke, canvasSize: ElementSize) { 
     applyCanvasStyle(ctx);
     ctx.strokeStyle = stroke.color;
     ctx.beginPath();
 
     for (let i = 0; i < stroke.points.length; i++) {
-        const p = geometry.pointToPixels(stroke.points[i], canvasSize);
+        const p = geometry.pointToPixels(stroke.points[i]!, canvasSize);
 
         if (i === 0) {
             ctx.moveTo(p[0], p[1]);
@@ -61,11 +54,8 @@ function drawStroke(ctx, stroke, canvasSize) {
 
 /**
  * Draws specific text on the canvas
- * @param {RenderContext} ctx
- * @param {TextDrawing} textDrawing 
- * @param {ElementSize} canvasSize
  */
-function drawText(ctx, textDrawing, canvasSize) { 
+function drawText(ctx: RenderContext, textDrawing: TextDrawing, canvasSize: ElementSize) { 
     const [x, y] = geometry.pointToPixels([textDrawing.x, textDrawing.y], canvasSize);
     ctx.font = "17px Arial";
     ctx.fillStyle = textDrawing.color;
@@ -73,9 +63,9 @@ function drawText(ctx, textDrawing, canvasSize) {
 }
 
 /**
- * @param {RenderContext} ctx 
+ * Applies default style to the canvas
  */
-function applyCanvasStyle(ctx) {
+function applyCanvasStyle(ctx: RenderContext) {
     ctx.lineWidth = LINE_WIDTH;
     ctx.lineCap = LINE_CAP;
 }

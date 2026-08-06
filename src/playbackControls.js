@@ -1,6 +1,6 @@
-/**@import {RangeInput, PlaybackButton} from "./types" */
+/**@import {RangeInput} from "./types" */
 import video from "./video.js";
-import {PLAYBACK_BUTTON} from "./types.js";
+import {PlaybackButton} from "./types.js";
 
 const VOLUME_SLIDER_MAX = 1000;
 const VOLUME_STEP = 20;
@@ -97,10 +97,10 @@ function onPlayBtnClick() {
     if (!video.isVideoLoaded()) return;
     if (video.isVideoPlaying()) {
         video.pauseVideo();
-        setPlayPauseBtnContent(PLAYBACK_BUTTON.PLAY);
+        setPlayPauseBtnContent(PlaybackButton.PLAY);
     } else {
         video.playVideo();
-        setPlayPauseBtnContent(PLAYBACK_BUTTON.PAUSE);
+        setPlayPauseBtnContent(PlaybackButton.PAUSE);
     }
 }
 

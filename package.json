@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/app.js --bundle --outfile=build/bundle.js"
+    "build": "esbuild src/app.ts --bundle --outfile=build/bundle.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/wicg-file-system-access": "^2023.10.7",
     "esbuild": "^0.28.1",
-    "typescript": "^7.0.2"
+    "typescript": "5.9"
   },
   "dependencies": {
     "jszip": "^3.10.1",
