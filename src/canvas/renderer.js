@@ -11,7 +11,6 @@ const LINE_CAP = "round";
  * @param {ElementSize} canvasSize
  */
 function renderFrame(ctx, annotations, canvasSize) { 
-    clearCanvas(ctx, canvasSize);
     for (const annotation of annotations) {
         switch (annotation.type) {
             case "stroke":

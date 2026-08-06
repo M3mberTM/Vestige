@@ -12,7 +12,6 @@ async function saveProject() {
     zip.file("annotations.json", JSON.stringify(annotations.exportAnnotations()));
 
     const blob = await zip.generateAsync({ type: "blob" });
-    // const url = URL.createObjectURL(blob);
 
     // @ts-ignore
     const handle = await window.showSaveFilePicker({

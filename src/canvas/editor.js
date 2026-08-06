@@ -20,8 +20,6 @@ let currentStroke = null;
 /** @type {TextDrawing | null} */
 let currentText = null;
 let color = "#000000";
-let canvasWidth = 0;
-let canvasHeight = 0;
 
 /** @type {DrawingTool} */
 let currentTool = TOOLS.BRUSH;
@@ -109,7 +107,6 @@ function createTextBox(e) {
     textToolInput.style.display = "block";
     requestAnimationFrame(() => textToolInput.focus());
     const [relativeX, relativeY] = geometry.pixelsToPoint(x, y, getCanvasSize());
-    console.log(document.activeElement);
     currentText = {
         type: "text",
         text: "",
@@ -134,6 +131,7 @@ function switchTool(tool) {
 function redrawCurrentFrame() {
     const frame = video.getCurrentFrame();
     const drawings = annotations.getFrameAnnotations(frame);
+    rendering.clearCanvas(ctx, getCanvasSize());
     rendering.renderFrame(ctx, drawings, getCanvasSize());
 }
 
@@ -143,6 +141,7 @@ function redrawCurrentFrame() {
  */
 function redrawFrame(frame) {
     const drawings = annotations.getFrameAnnotations(frame);
+    rendering.clearCanvas(ctx, getCanvasSize());
     rendering.renderFrame(ctx, drawings, getCanvasSize());
 }
 
